@@ -1,76 +1,75 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MovieVerse</title>
+    <meta name="theme-color" content="#03040b">
+    <meta name="description" content="MovieVerse is a cinematic home for discovering what to watch next.">
+    <title>MovieVerse | Find your next favorite</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-    <header>
-        <div class="logo">MovieVerse</div>
-        <nav>
-            <a href="#">Home</a>
-            <a href="#">Movies</a>
-            <a href="#">Series</a>
-            <a href="#">Plans</a>
-        </nav>
-        <button class="signin-btn">Sign In</button>
+    <div class="site-noise" aria-hidden="true"></div>
+    <div class="ambient ambient-violet" aria-hidden="true"></div>
+    <div class="ambient ambient-cyan" aria-hidden="true"></div>
+    <div class="auth-shell" id="auth-shell" aria-live="polite">
+        <div class="auth-orbit auth-orbit-one" aria-hidden="true"></div>
+        <div class="auth-orbit auth-orbit-two" aria-hidden="true"></div>
+        <div class="auth-panel">
+            <a class="brand auth-brand" href="#auth" aria-label="MovieVerse authentication">
+                <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="auth-mv-gradient" x1="8" x2="58" y1="55" y2="7" gradientUnits="userSpaceOnUse"><stop stop-color="#22D3EE"/><stop offset=".48" stop-color="#6848D9"/><stop offset="1" stop-color="#A78BFA"/></linearGradient></defs><path class="mark-frame" stroke="url(#auth-mv-gradient)" d="M32 4a28 28 0 1 1-20.8 9.2"/><path class="mark-m" stroke="url(#auth-mv-gradient)" d="m15 43 6-23 11 15 11-15 6 23"/><path class="mark-spark" fill="url(#auth-mv-gradient)" d="m48 11 3 6 6 3-6 3-3 6-3-6-6-3 6-3 3-6Z"/></svg>
+                <span class="brand-name">MOVIE<span>VERSE</span></span>
+            </a>
+            <div class="auth-view" id="auth-view">
+                <div class="auth-copy"><p class="eyebrow"><span class="eyebrow-dot"></span> Your entertainment universe</p><h1>Find stories<br>that <em>find you.</em></h1><p>Step into a more personal way to discover what belongs on your screen.</p></div>
+                <div class="auth-card">
+                    <div class="auth-tabs" role="tablist" aria-label="Authentication mode"><button class="auth-tab active" type="button" data-auth-tab="signin" role="tab" aria-selected="true">Sign in</button><button class="auth-tab" type="button" data-auth-tab="signup" role="tab" aria-selected="false">Create account</button></div>
+                    <form class="auth-form active" id="signin-form" data-auth-form="signin" novalidate><div class="form-heading"><p class="kicker">Welcome back</p><h2>Continue your <em>journey.</em></h2><p>Use the demo account or create your own local account.</p></div><label>Email<input name="email" type="email" autocomplete="email" placeholder="you@example.com" required><span class="field-error" data-error="email"></span></label><label>Password<div class="password-field"><input name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required><button type="button" class="password-toggle" data-password-toggle aria-label="Show password">Show</button></div><span class="field-error" data-error="password"></span></label><div class="form-row"><label class="check-label"><input name="remember" type="checkbox"><span>Remember me</span></label><button class="text-button" type="button" data-show-view="forgot">Forgot password?</button></div><div class="form-error" data-form-error="signin"></div><button class="button button-primary form-submit" type="submit">Sign in <span>↗</span></button><button class="button button-quiet form-submit" type="button" data-guest>Continue as guest <span>→</span></button><p class="demo-note">Demo access: <strong>demo@movieverse.local</strong> / <strong>movieverse</strong></p></form>
+                    <form class="auth-form" id="signup-form" data-auth-form="signup" novalidate><div class="form-heading"><p class="kicker">Start here</p><h2>Make it <em>yours.</em></h2><p>A local demo account keeps your preferences on this device.</p></div><label>Full name<input name="name" type="text" autocomplete="name" placeholder="Your name" required><span class="field-error" data-error="name"></span></label><label>Email<input name="email" type="email" autocomplete="email" placeholder="you@example.com" required><span class="field-error" data-error="email"></span></label><label>Password<div class="password-field"><input name="password" type="password" autocomplete="new-password" placeholder="Create a password" required><button type="button" class="password-toggle" data-password-toggle aria-label="Show password">Show</button></div><div class="password-requirements" data-password-requirements aria-live="polite"><span data-rule="length">Minimum 8 characters</span><span data-rule="upper">Uppercase letter</span><span data-rule="lower">Lowercase letter</span><span data-rule="number">Number</span><span data-rule="special">Special character</span></div><span class="password-strength" aria-live="polite"></span><span class="field-error" data-error="password"></span></label><label>Confirm password<div class="password-field"><input name="confirm" type="password" autocomplete="new-password" placeholder="Repeat your password" required><button type="button" class="password-toggle" data-password-toggle aria-label="Show password">Show</button></div><span class="field-error" data-error="confirm"></span></label><div class="form-error" data-form-error="signup"></div><button class="button button-primary form-submit" type="submit">Create account <span>↗</span></button></form>
+                    <div class="forgot-view" data-view="forgot"><button class="back-button" type="button" data-show-view="signin">← Back to sign in</button><div class="form-heading"><p class="kicker">Account recovery</p><h2>Reset your <em>way in.</em></h2><p>Enter your email and we will simulate a reset link on this device.</p></div><form id="forgot-form" novalidate><label>Email<input name="email" type="email" placeholder="you@example.com" required><span class="field-error" data-error="forgot-email"></span></label><div class="form-error" data-form-error="forgot"></div><button class="button button-primary form-submit" type="submit">Send reset link <span>↗</span></button></form></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="onboarding-shell" id="onboarding-shell" aria-live="polite" hidden><div class="onboarding-glow onboarding-glow-one"></div><div class="onboarding-glow onboarding-glow-two"></div><div class="onboarding-top"><a class="brand" href="#" aria-label="MovieVerse"><svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true"><path class="mark-frame" d="M32 4a28 28 0 1 1-20.8 9.2"/><path class="mark-m" d="m15 43 6-23 11 15 11-15 6 23"/><path class="mark-spark" d="m48 11 3 6 6 3-6 3-3 6-3-6-6-3 6-3 3-6Z"/></svg><span class="brand-name">MOVIE<span>VERSE</span></span></a><button class="text-button" type="button" data-logout>Exit</button></div><div class="onboarding-progress"><div class="progress-copy"><span id="onboarding-step-label">STEP 1 OF 5</span><span id="onboarding-step-count">01 / 05</span></div><div class="progress-track"><i id="onboarding-progress-bar"></i></div></div><main class="onboarding-main"><div class="onboarding-intro"><p class="kicker">Personalize your orbit</p><h1 id="onboarding-title">What are you into?</h1><p id="onboarding-description">Choose a few worlds you want MovieVerse to keep close.</p></div><section class="selection-grid" id="onboarding-options" aria-label="Personalization choices"></section><div class="onboarding-actions"><button class="button button-quiet" type="button" id="onboarding-back">← Back</button><span class="selection-hint" id="selection-hint">Choose at least 3</span><button class="button button-primary" type="button" id="onboarding-next">Next <span>→</span></button></div></main></div>
+    <div class="personalization-shell" id="personalization-shell" hidden><div class="personalization-ring"><span class="pulse"></span></div><p class="kicker">Your MovieVerse is forming</p><h1 id="personalization-stage">Understanding your interests...</h1><div class="personalization-dots"><i></i><i></i><i></i></div><div class="personalization-ready" hidden><h2>Your MovieVerse <em>is ready.</em></h2><p>Your preferences are saved for the next chapter of discovery.</p><button class="button button-primary" type="button" data-enter-home>Enter MovieVerse <span>↗</span></button></div></div>
+    <section class="profile-shell" id="profile-shell" hidden aria-labelledby="profile-title"><div class="profile-shell-orbit" aria-hidden="true"></div><div class="profile-top"><a class="brand" href="#" aria-label="MovieVerse"><svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true"><path class="mark-frame" d="M32 4a28 28 0 1 1-20.8 9.2"/><path class="mark-m" d="m15 43 6-23 11 15 11-15 6 23"/><path class="mark-spark" d="m48 11 3 6 6 3-6 3-3 6-3-6-6-3 6-3 3-6Z"/></svg><span class="brand-name">MOVIE<span>VERSE</span></span></a><button class="text-button" type="button" id="profile-exit">Log out</button></div><div class="profile-heading"><p class="kicker">Your personal orbit</p><h1 id="profile-title">Who's watching?</h1><p>Choose a profile to make MovieVerse feel like yours.</p><span id="profile-count">0 / 10 PROFILES</span></div><div class="profile-grid" id="profile-grid"></div><div class="profile-editor" id="profile-editor" hidden><form id="profile-form"><button class="editor-close" id="profile-cancel" type="button" aria-label="Close editor">×</button><p class="kicker">Profile editor</p><h2>Make it <em>personal.</em></h2><label>Profile name<input name="name" maxlength="28" required placeholder="Profile name"><span class="profile-error" data-error></span></label><label>Profile type<select name="type"><option value="standard">Standard</option><option value="kids">Kids</option></select></label><label>Optional 4-digit demo PIN<input name="pin" inputmode="numeric" maxlength="4" placeholder="Leave blank to disable"></label><p class="avatar-label">Choose a MovieVerse avatar</p><div class="avatar-picker"><button type="button" class="avatar-option avatar-cosmic-01" data-avatar="cosmic-01" aria-label="Choose cosmic avatar one"></button><button type="button" class="avatar-option avatar-cosmic-02" data-avatar="cosmic-02" aria-label="Choose cosmic avatar two"></button><button type="button" class="avatar-option avatar-geo-01" data-avatar="geo-01" aria-label="Choose geometric avatar one"></button><button type="button" class="avatar-option avatar-geo-02" data-avatar="geo-02" aria-label="Choose geometric avatar two"></button><button type="button" class="avatar-option avatar-orbit-01" data-avatar="orbit-01" aria-label="Choose orbit avatar one"></button><button type="button" class="avatar-option avatar-orbit-02" data-avatar="orbit-02" aria-label="Choose orbit avatar two"></button><button type="button" class="avatar-option avatar-gradient-01" data-avatar="gradient-01" aria-label="Choose gradient avatar one"></button><button type="button" class="avatar-option avatar-gradient-02" data-avatar="gradient-02" aria-label="Choose gradient avatar two"></button></div><button class="button button-primary" type="submit">Save profile <span>↗</span></button></form></div></section>
+    <div class="app-shell" id="app-shell" hidden>
+    <header class="site-header" id="top">
+        <a class="brand" href="#top" aria-label="MovieVerse home">
+            <svg class="brand-mark" viewBox="0 0 64 64" role="img" aria-label="MovieVerse mark">
+                <defs><linearGradient id="mv-gradient" x1="8" x2="58" y1="55" y2="7" gradientUnits="userSpaceOnUse"><stop stop-color="#22D3EE"/><stop offset=".48" stop-color="#6848D9"/><stop offset="1" stop-color="#A78BFA"/></linearGradient></defs>
+                <path class="mark-frame" d="M32 4a28 28 0 1 1-20.8 9.2"/>
+                <path class="mark-m" d="m15 43 6-23 11 15 11-15 6 23"/>
+                <path class="mark-spark" d="m48 11 3 6 6 3-6 3-3 6-3-6-6-3 6-3 3-6Z"/>
+                <path class="mark-cut" d="M26 38h20"/>
+            </svg>
+            <span class="brand-name">MOVIE<span>VERSE</span></span>
+        </a>
+        <nav class="main-nav" aria-label="Main navigation"><a class="active" href="#home">Home</a><a href="#popular-movies">Movies</a><a href="#popular-series">Series</a><a href="#explore">Explore</a><a href="#genres">Genres</a></nav>
+        <div class="header-actions"><button class="icon-button" type="button" aria-label="Search" title="Search coming soon"><span class="search-glyph"></span></button><button class="profile-chip" type="button" data-logout aria-label="Log out of demo session" title="Log out"><span class="avatar">MV</span><span class="profile-label">Guest</span><span class="chevron">⌄</span></button><button class="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false"><span></span><span></span><span></span></button></div>
     </header>
 
-    <section class="hero">
-        <div class="hero-content">
-            <h1>Unlimited Movies, TV Shows & More</h1>
-            <p>Watch anywhere. Cancel anytime.</p>
-            <button class="start-btn">Get Started</button>
+    <main id="home">
+        <section class="hero section-reveal"><div class="hero-grid"></div><div class="hero-content"><p class="eyebrow"><span class="eyebrow-dot"></span> Enter the MovieVerse <span class="eyebrow-line"></span></p><h1>Stories in<br><em>every direction.</em></h1><p class="hero-copy">A living constellation of films, series, and unforgettable moments. Follow the light to something worth watching.</p><div class="hero-actions"><a class="button button-primary" href="#trending">Explore the universe <span>↗</span></a><a class="button button-quiet" href="#mood">Find your mood <span>→</span></a></div><div class="hero-meta"><span>Curated discovery</span><i></i><span>Original collections</span><i></i><span>Your next story awaits</span></div></div><div class="hero-art" aria-label="Abstract cinematic MovieVerse artwork"><div class="hero-sun"></div><div class="hero-orbit hero-orbit-one"></div><div class="hero-orbit hero-orbit-two"></div><div class="hero-orbit hero-orbit-three"></div><div class="hero-frame frame-main"><span class="frame-kicker">MV / 001</span><strong>THE<br><em>UNKNOWN</em><br>HOUR</strong><small>A story is a door.</small></div><div class="hero-frame frame-side"><span>AFTER<br>ATLAS</span><small>New worlds await</small></div><div class="hero-frame frame-glow"><span>03</span></div><div class="art-caption"><span class="pulse"></span><span>Signal detected</span></div></div></section>
+        <section class="intro-strip section-reveal"><p>THE MOVIEVERSE METHOD</p><strong>Less scrolling.<br><em>More finding.</em></strong><span>Explore by feeling, follow your curiosities,<br>and keep every story in one orbit.</span></section>
+        <div class="content-wrap" id="explore">
+            <section class="content-section section-reveal" id="trending"><div class="section-heading"><div><p class="kicker">Right now</p><h2>Trending <em>now</em></h2></div><a href="#" class="section-link">See the full orbit <span>→</span></a></div><div class="card-rail" data-rail="trending"></div></section>
+            <section class="content-section section-reveal" id="popular-movies"><div class="section-heading"><div><p class="kicker">The big screen</p><h2>Popular <em>movies</em></h2></div><a href="#" class="section-link">Browse movies <span>→</span></a></div><div class="card-rail" data-rail="popularMovies"></div></section>
+            <section class="content-section section-reveal" id="popular-series"><div class="section-heading"><div><p class="kicker">Long-form stories</p><h2>Popular <em>series</em></h2></div><a href="#" class="section-link">Browse series <span>→</span></a></div><div class="card-rail" data-rail="popularSeries"></div></section>
+            <section class="content-section section-reveal"><div class="section-heading"><div><p class="kicker">Worth your time</p><h2>Top <em>rated</em></h2></div><a href="#" class="section-link">View rankings <span>→</span></a></div><div class="card-rail" data-rail="topRated"></div></section>
+            <section class="content-section section-reveal"><div class="section-heading"><div><p class="kicker">Fresh arrivals</p><h2>Now <em>playing</em></h2></div><a href="#" class="section-link">See what's new <span>→</span></a></div><div class="card-rail" data-rail="nowPlaying"></div></section>
+            <section class="content-section section-reveal"><div class="section-heading"><div><p class="kicker">On the horizon</p><h2>Coming <em>soon</em></h2></div><a href="#" class="section-link">Set a reminder <span>→</span></a></div><div class="card-rail" data-rail="upcoming"></div></section>
+            <section class="split-feature section-reveal"><div class="feature-copy"><p class="kicker">Your orbit</p><h2>Pick up<br>where you <em>left off.</em></h2><p>Keep your next great watch close. Your personal shelves will live here, ready whenever you are.</p><a class="button button-outline" href="#">View your collection <span>→</span></a></div><div class="feature-shelves"><div class="shelf-row"><span class="shelf-label">CONTINUE WATCHING</span><div class="mini-progress"><i></i></div><span>78%</span></div><div class="shelf-row muted"><span class="shelf-label">RECENTLY VIEWED</span><div class="mini-progress"><i></i></div><span>—</span></div><div class="shelf-row muted"><span class="shelf-label">MY LIST</span><div class="mini-progress"><i></i></div><span>—</span></div></div></section>
+            <section class="content-section section-reveal"><div class="section-heading"><div><p class="kicker">A little nudge</p><h2>Because you <em>watched</em></h2></div><a href="#" class="section-link">Refresh picks <span>↻</span></a></div><div class="card-rail" data-rail="recommendations"></div></section>
+            <section class="discovery-grid section-reveal" id="mood"><div class="discovery-panel mood-panel"><p class="kicker">Discover by feeling</p><h2>How are<br>you <em>feeling?</em></h2><div class="mood-list"><button>✦ Happy</button><button>◌ Thoughtful</button><button>↗ Excited</button><button>♡ Romantic</button><button>☾ Relaxed</button><button>✺ Scared</button></div></div><div class="discovery-panel genre-panel" id="genres"><p class="kicker">Explore the universe</p><h2>Your next<br><em>genre journey.</em></h2><div class="genre-cloud"><span>SCI-FI</span><span>THRILLER</span><span>COMEDY</span><span>ANIMATION</span><span>FANTASY</span><span>DRAMA</span><span>CRIME</span><span>ROMANCE</span></div></div></section>
+            <section class="content-section section-reveal"><div class="section-heading"><div><p class="kicker">Beyond the screen</p><h2>Find your <em>world.</em></h2></div><a href="#" class="section-link">Explore all worlds <span>→</span></a></div><div class="domain-grid"><a href="#" class="domain-tile domain-anime"><span>01</span><strong>Anime</strong><small>Stories without limits</small></a><a href="#" class="domain-tile domain-sports"><span>02</span><strong>Sports</strong><small>The moments that move us</small></a><a href="#" class="domain-tile domain-music"><span>03</span><strong>Music & Performance</strong><small>Feel it in every frame</small></a><a href="#" class="domain-tile domain-docs"><span>04</span><strong>Documentaries</strong><small>Look closer</small></a><a href="#" class="domain-tile domain-comedy"><span>05</span><strong>Comedy</strong><small>Good mood, guaranteed</small></a></div></section>
+            <section class="content-section section-reveal"><div class="section-heading"><div><p class="kicker">Curated for you</p><h2>Small finds.<br><em>Big feelings.</em></h2></div><a href="#" class="section-link">View all collections <span>→</span></a></div><div class="collection-grid"><a href="#" class="collection-card collection-gem"><span>THE QUIET ONES</span><small>Hidden gems</small></a><a href="#" class="collection-card collection-binge"><span>ONE MORE EPISODE</span><small>Binge worthy</small></a><a href="#" class="collection-card collection-short"><span>UNDER 90</span><small>Short watch</small></a></div></section>
+            <section class="final-cta section-reveal"><div><p class="kicker">A little more magic</p><h2>Meet MovieVerse <em>Max.</em></h2><p>When you want to go deeper, there is always another world to find.</p></div><div class="cta-actions"><button class="button button-primary" type="button">Surprise me <span>✦</span></button><button class="button button-quiet" type="button">Try Watch Match <span>→</span></button></div></section>
         </div>
-    </section>
-
-    <section class="section">
-        <h2>🔥 Trending Now</h2>
-        <div class="movies">
-            <div class="card">Movie 1</div>
-            <div class="card">Movie 2</div>
-            <div class="card">Movie 3</div>
-            <div class="card">Movie 4</div>
-        </div>
-    </section>
-
-    <section class="section">
-        <h2>⭐ Top Rated</h2>
-        <div class="movies">
-            <div class="card">Series 1</div>
-            <div class="card">Series 2</div>
-            <div class="card">Series 3</div>
-            <div class="card">Series 4</div>
-        </div>
-    </section>
-
-    <section class="plans">
-        <h2>Choose Your Plan</h2>
-
-        <div class="plan-container">
-            <div class="plan">
-                <h3>Basic</h3>
-                <p>$5/month</p>
-            </div>
-
-            <div class="plan">
-                <h3>Standard</h3>
-                <p>$10/month</p>
-            </div>
-
-            <div class="plan">
-                <h3>Premium</h3>
-                <p>$15/month</p>
-            </div>
-        </div>
-    </section>
-
-    <footer>
-        <p>© 2026 MovieVerse. All Rights Reserved.</p>
-    </footer>
-    <script src="script.js"></script>
+    </main>
+    <footer class="site-footer"><a class="brand" href="#top" aria-label="MovieVerse home"><svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true"><path class="mark-frame" d="M32 4a28 28 0 1 1-20.8 9.2"/><path class="mark-m" d="m15 43 6-23 11 15 11-15 6 23"/><path class="mark-spark" d="m48 11 3 6 6 3-6 3-3 6-3-6-6-3 6-3 3-6Z"/><path class="mark-cut" d="M26 38h20"/></svg><span class="brand-name">MOVIE<span>VERSE</span></span></a><p>Stories in every direction.</p><div class="footer-links"><a href="#top">Back to top ↑</a><a href="#genres">Genre universe</a><a href="#mood">Mood discovery</a></div><small>© 2026 MovieVerse. A cinematic discovery concept.</small></footer>
+    </div>
+    <script type="module" src="script.js"></script>
 </body>
 </html>

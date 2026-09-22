@@ -1,0 +1,1 @@
+.selection-grid.step-enter{animation:mv-step-enter .5s var(--ease)}@keyframes mv-step-enter{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}@media(prefers-reduced-motion:reduce){.selection-grid.step-enter{animation:none}}

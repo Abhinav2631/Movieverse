@@ -1,3 +1,1 @@
-document.addEventListener("DOMContentLoaded", () => {
-    console.log("MovieVerse Loaded Successfully");
-});
+import "./js/main.js";
