@@ -76,7 +76,7 @@ MovieVerse is a static front-end. When a valid TMDB read token is configured, th
 
 - The Home rails request trending, popular movies, popular series, top-rated, now-playing, and upcoming data when Home is entered.
 - The home rails refresh every 30 minutes while the app is visible, or when a user returns to the tab after at least 30 minutes.
-- The hero rotates through up to 20 unique titles from two pages of TMDB's daily-trending endpoint every 6.5 seconds. It refreshes its candidate list every 30 minutes. The motion is a carousel; it is not a real-time event/news feed.
+- The hero rotates through up to 20 unique titles from three pages of TMDB's daily-trending endpoint every 6.5 seconds. It refreshes its candidate list every 30 minutes. The motion is a carousel; it is not a real-time event/news feed.
 - Opening a title fetches current title metadata and regional watch-provider data from TMDB. Provider availability is region-sensitive and can change.
 - The watch-provider API, supported by TMDB's JustWatch partnership, does **not** provide provider-specific playback deep links. Recognized providers open a title-filled search on the official streaming service. For providers without a reliable service search URL, MovieVerse opens the title's provider-availability page instead, where a supported service link may be available. A search result is not a guarantee that the title is included in a subscription.
 - The “Set a reminder” control only saves a preference in this browser and displays a notice. It does not send notifications because the project has no backend or notification service.
