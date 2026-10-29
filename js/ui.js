@@ -95,38 +95,15 @@ function getType(
     return "Movie";
 }
 
-function getYear(
-    item,
-    index
-) {
-    const date =
-        item.release_date ||
-        item.first_air_date;
-
-    return date
-        ? date.slice(0, 4)
-        : String(
-              2022 +
-                  (index %
-                      5)
-          );
+function getYear(item) {
+    const date = item.release_date || item.first_air_date;
+    return date ? date.slice(0, 4) : "—";
 }
 
-function getRating(
-    item,
-    index
-) {
-    return Number.isFinite(
-        item.vote_average
-    )
-        ? item.vote_average.toFixed(
-              1
-          )
-        : (
-              7.4 +
-              index /
-                  10
-          ).toFixed(1);
+function getRating(item) {
+    return Number.isFinite(item.vote_average)
+        ? item.vote_average.toFixed(1)
+        : "—";
 }
 
 function getFallback(
@@ -170,17 +147,9 @@ function createMovieCard(
             section
         );
 
-    const year =
-        getYear(
-            item,
-            index
-        );
+    const year = getYear(item);
 
-    const rating =
-        getRating(
-            item,
-            index
-        );
+    const rating = getRating(item);
 
     const fallback =
         getFallback(
@@ -304,9 +273,10 @@ function createMovieCard(
                         )}
                     </span>
 
-                    <span>
-                        ★ ${rating}
+                    <span title="Rating supplied by TMDB">
+                        ★ ${rating} TMDB
                     </span>
+                    <a class="movie-imdb-link" data-imdb-search href="https://www.imdb.com/find/?q=${encodeURIComponent(title)}" target="_blank" rel="noopener noreferrer" aria-label="Find ${escapeHTML(title)} on IMDb">IMDb ↗</a>
                 </div>
             </div>
         </article>
