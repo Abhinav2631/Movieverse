@@ -116,7 +116,7 @@ function findTrailer(videos) {
 
 function getRegionProviders(item) {
     const region =
-        MOVIEVERSE_CONFIG.tmdbRegion || "US";
+        MOVIEVERSE_CONFIG.tmdbRegion || "IN";
 
     const providerData =
         item?.["watch/providers"]?.results?.[region];
@@ -138,6 +138,23 @@ function getRegionProviders(item) {
 function getProviderDestination(providerName, title, availabilityUrl = "") {
     const name = String(providerName || "").toLowerCase();
     const query = encodeURIComponent(String(title || "").trim());
+
+    // Branded channels inside another platform (for example, "Aha Amazon Channel")
+    // are not the same destination as the standalone provider. Keep those on the
+    // title-specific availability page so we do not send users to the wrong app.
+    const isThirdPartyChannel = /amazon channel/i.test(name);
+    if (
+        isThirdPartyChannel &&
+        typeof availabilityUrl === "string" &&
+        /^https:\/\//i.test(availabilityUrl)
+    ) {
+        return {
+            url: availabilityUrl,
+            label: `Find ${title} on ${providerName} via the availability listing`,
+            exactTitleDeepLink: false
+        };
+    }
+
     const routes = [
         [/netflix/i, `https://www.netflix.com/search?q=${query}`],
         [/amazon prime video|prime video/i, `https://www.primevideo.com/search/ref=atv_nb_sr?phrase=${query}`],
