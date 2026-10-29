@@ -55,7 +55,7 @@ Because it is a static app, there is no build step:
 
 A valid TMDB read token is required only for live content and metadata requests. If the token is empty or invalid, the app will warn in the console and continue with an empty demo response rather than crashing.
 
-Use a safe local config file instead of committing credentials. Keep the token in `config/config.js`, which is ignored by git.
+Use a safe local config file instead of committing credentials. Keep the token in `config/config.js`, which is ignored by git. For the India catalog, set `tmdbRegion: "IN"` in your existing local `config/config.js`. Pulling the feature branch will not overwrite that ignored local file, so verify the region value manually.
 
 ## Docker
 
