@@ -346,6 +346,8 @@ function renderWhereToWatch(item) {
                 </span>
             </div>
 
+            <p class="provider-redirect-hint">Select a service to search for this title. Availability and playback can depend on your region and subscription.</p>
+
             <div class="provider-groups">
                 ${availableSections
                     .map(
