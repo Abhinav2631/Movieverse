@@ -1998,54 +1998,30 @@ function setupExternalTriggers() {
         });
 
     document
-        .querySelectorAll(
-            ".domain-tile"
-        )
+        .querySelectorAll(".domain-tile")
         .forEach((tile) => {
-            tile.addEventListener(
-                "click",
-                (event) => {
-                    event.preventDefault();
+            tile.addEventListener("click", (event) => {
+                event.preventDefault();
 
-                    const className =
-                        [...tile.classList].find(
-                            (item) =>
-                                item.startsWith(
-                                    "domain-"
-                                )
-                        );
+                const className = [...tile.classList].find((item) =>
+                    item.startsWith("domain-")
+                );
+                const map = {
+                    "domain-anime": "anime",
+                    "domain-sports": "sports",
+                    "domain-music": "music",
+                    "domain-docs": "docs",
+                    "domain-comedy": "comedy"
+                };
+                const key = map[className];
 
-                    const map = {
-                        "domain-anime":
-                            "anime",
-                        "domain-sports":
-                            "sports",
-                        "domain-music":
-                            "music",
-                        "domain-docs":
-                            "docs",
-                        "domain-comedy":
-                            "comedy"
-                    };
-
-                    openFeatures(
-                        "domains"
-                    );
-
-                    const key =
-                        map[className];
-
-                    if (key) {
-                        window.setTimeout(
-                            () =>
-                                loadDomain(
-                                    key
-                                ),
-                            50
-                        );
-                    }
+                if (key) {
+                    // Render that world's results immediately; don't leave the modal on the generic world-picker.
+                    openDomain(key);
+                } else {
+                    openFeatures("domains");
                 }
-            );
+            });
         });
 
     document
