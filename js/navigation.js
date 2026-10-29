@@ -1,6 +1,7 @@
 import {
     openFeatures,
-    openDomain
+    openDomain,
+    openTrending
 } from "./features.js";
 
 function scrollToSection(
@@ -202,21 +203,16 @@ function setupSectionLinks() {
                             return;
                         }
 
-                        if (
-                            text.includes(
-                                "full orbit"
-                            ) ||
-                            text.includes(
-                                "explore all"
-                            ) ||
-                            text.includes(
-                                "collections"
-                            )
-                        ) {
-                            openFeatures(
-                                "domains"
-                            );
+                        if (text.includes("full orbit")) {
+                            openTrending();
+                            return;
+                        }
 
+                        if (
+                            text.includes("explore all") ||
+                            text.includes("collections")
+                        ) {
+                            openFeatures("domains");
                             return;
                         }
 
@@ -471,13 +467,6 @@ function setupCredits() {
 export function setupNavigation({
     showProfiles
 }) {
-    // These screen-local logos are decorative; do not let href="#" jump the page.
-    document
-        .querySelectorAll(".onboarding-top .brand, .profile-top .brand")
-        .forEach((brand) => {
-            brand.addEventListener("click", (event) => event.preventDefault());
-        });
-
     setupProfileChip(
         showProfiles
     );
