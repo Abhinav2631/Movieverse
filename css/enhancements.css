@@ -271,3 +271,14 @@
     .hero-tmdb .hero-content { max-width:100%; }
     .hero-tmdb .hero-art { opacity:.45; }
 }
+
+.movie-meta .movie-imdb-link {
+    color: #fde68a;
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 800;
+    margin-top: 4px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+.movie-meta .movie-imdb-link:hover { color: #fff; }
