@@ -143,14 +143,18 @@ function getProviderDestination(providerName, title, availabilityUrl = "") {
     // are not the same destination as the standalone provider. Keep those on the
     // title-specific availability page so we do not send users to the wrong app.
     const isThirdPartyChannel = /amazon channel/i.test(name);
-    if (
-        isThirdPartyChannel &&
-        typeof availabilityUrl === "string" &&
-        /^https:\/\//i.test(availabilityUrl)
-    ) {
+    if (isThirdPartyChannel) {
+        if (typeof availabilityUrl === "string" && /^https:\/\//i.test(availabilityUrl)) {
+            return {
+                url: availabilityUrl,
+                label: `Find ${title} on ${providerName} via the availability listing`,
+                exactTitleDeepLink: false
+            };
+        }
+
         return {
-            url: availabilityUrl,
-            label: `Find ${title} on ${providerName} via the availability listing`,
+            url: `https://www.google.com/search?q=${encodeURIComponent(`${providerName} ${title} official streaming`)}`,
+            label: `Find ${title} on ${providerName}`,
             exactTitleDeepLink: false
         };
     }
@@ -337,7 +341,7 @@ function renderWhereToWatch(item) {
                 <span class="provider-region">
                     REGION
                     ${escapeHTML(
-                        MOVIEVERSE_CONFIG.tmdbRegion || "US"
+                        MOVIEVERSE_CONFIG.tmdbRegion || "IN"
                     )}
                 </span>
             </div>
