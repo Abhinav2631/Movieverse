@@ -16,7 +16,10 @@ import {
     isInMyList,
     isInWishlist,
     isWatched,
-    addRecentlyViewed
+    addRecentlyViewed,
+    getContinueWatching,
+    setContinueWatching,
+    removeContinueWatching
 } from "./library.js";
 
 let detailsModal = null;
@@ -563,6 +566,10 @@ function renderDetails(
         libraryItem.id
     );
 
+    const inContinueWatching = getContinueWatching().some(
+        (entry) => String(entry.id) === String(libraryItem.id)
+    );
+
     content.innerHTML = `
         <section
             class="details-hero"
@@ -687,6 +694,15 @@ function renderDetails(
                                 ? "♥ In Wishlist"
                                 : "♡ Wishlist"
                         }
+                    </button>
+
+                    <button
+                        type="button"
+                        class="button button-quiet"
+                        data-details-continue
+                        data-active="${inContinueWatching ? "true" : "false"}"
+                    >
+                        ${inContinueWatching ? "✓ In Continue Watching" : "+ Continue Watching"}
                     </button>
 
                     <button
@@ -1029,6 +1045,11 @@ function bindDetailsActions(
             "[data-details-watched]"
         );
 
+    const continueButton =
+        detailsModal.querySelector(
+            "[data-details-continue]"
+        );
+
     listButton?.addEventListener(
         "click",
         () => {
@@ -1073,6 +1094,22 @@ function bindDetailsActions(
 
                 wishlistButton.dataset.active =
                     "false";
+            }
+        }
+    );
+
+    continueButton?.addEventListener(
+        "click",
+        () => {
+            const active = continueButton.dataset.active === "true";
+            if (active) {
+                removeContinueWatching(libraryItem.id);
+                continueButton.textContent = "+ Continue Watching";
+                continueButton.dataset.active = "false";
+            } else {
+                setContinueWatching(libraryItem, 0);
+                continueButton.textContent = "✓ In Continue Watching";
+                continueButton.dataset.active = "true";
             }
         }
     );
