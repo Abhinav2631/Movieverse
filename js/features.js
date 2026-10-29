@@ -1285,9 +1285,7 @@ function renderResults(
                                             : ""
                                     }
                                     ${
-                                        Number.isFinite(
-                                            item.vote_average
-                                        )
+                                        Number.isFinite(item.vote_average) && item.vote_average > 0
                                             ? ` • ★ ${item.vote_average.toFixed(
                                                   1
                                               )}`
@@ -1635,14 +1633,10 @@ function renderComparison(
         <div class="mv-comparison-grid">
             ${comparisonRow(
                 "Rating",
-                Number.isFinite(
-                    first.vote_average
-                )
+                Number.isFinite(first.vote_average) && first.vote_average > 0
                     ? first.vote_average.toFixed(1)
                     : "—",
-                Number.isFinite(
-                    second.vote_average
-                )
+                Number.isFinite(second.vote_average) && second.vote_average > 0
                     ? second.vote_average.toFixed(1)
                     : "—"
             )}
