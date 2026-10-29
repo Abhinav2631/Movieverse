@@ -282,3 +282,7 @@
     text-underline-offset: 3px;
 }
 .movie-meta .movie-imdb-link:hover { color: #fff; }
+
+.details-person[data-person-id] { cursor:pointer; transition:transform .2s ease,border-color .2s ease; }
+.details-person[data-person-id]:hover { border-color:var(--cyan); transform:translateY(-2px); }
+.details-person[data-person-id]:focus-visible { outline:2px solid var(--cyan); outline-offset:3px; }
