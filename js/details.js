@@ -534,9 +534,7 @@ function toLibraryItem(item, mediaType) {
         posterPath: item.poster_path || null,
         backdropPath: item.backdrop_path || null,
         overview: item.overview || "",
-        voteAverage: Number.isFinite(
-            item.vote_average
-        )
+        voteAverage: Number.isFinite(item.vote_average) && item.vote_average > 0
             ? item.vote_average
             : null,
         releaseDate:
@@ -566,15 +564,11 @@ function renderDetails(
     const runtime = formatRuntime(item, mediaType);
     const genres = formatGenres(item);
 
-    const rating = Number.isFinite(
-        item?.vote_average
-    )
+    const rating = Number.isFinite(item?.vote_average) && item.vote_average > 0
         ? item.vote_average.toFixed(1)
         : "—";
 
-    const votes = Number.isFinite(
-        item?.vote_count
-    )
+    const votes = Number.isFinite(item?.vote_count) && item.vote_count > 0
         ? item.vote_count.toLocaleString()
         : "—";
 

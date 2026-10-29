@@ -147,7 +147,7 @@ function updateHero(item) {
             ${year ? "<i></i>" : ""}
             ${year ? `<span>${escapeHTML(year)}</span>` : ""}
             <i></i>
-            <span>${Number.isFinite(item.vote_average) ? `★ ${item.vote_average.toFixed(1)} TMDB` : "Trending now"}</span>
+            <span>${Number.isFinite(item.vote_average) && item.vote_average > 0 ? `★ ${item.vote_average.toFixed(1)} TMDB` : "Trending now"}</span>
         `;
     }
 
