@@ -261,6 +261,14 @@ function ensureHoverPopover() {
     hoverPopover.className = "mv-hover-popover";
     hoverPopover.hidden = true;
     hoverPopover.setAttribute("aria-live", "polite");
+    hoverPopover.addEventListener("mouseenter", () => {
+        window.clearTimeout(hoverTimer);
+        window.clearTimeout(personHoverTimer);
+    });
+    hoverPopover.addEventListener("mouseleave", () => {
+        hoverPopover.hidden = true;
+        hoveredCard = null;
+    });
     document.body.appendChild(hoverPopover);
     return hoverPopover;
 }
@@ -364,6 +372,7 @@ function setupHoverDetails() {
     document.addEventListener("mouseout", (event) => {
         const target = event.target.closest?.(".details-cast-card[data-person-id], .details-person[data-person-id], .movie-card[data-tmdb-id], .mv-result-card[data-result-id], .details-similar-card[data-similar-id]");
         if (!target || target.contains(event.relatedTarget)) return;
+        if (event.relatedTarget === hoverPopover) return;
         if (hoveredCard === target) hoveredCard = null;
         window.clearTimeout(hoverTimer);
         window.clearTimeout(personHoverTimer);
