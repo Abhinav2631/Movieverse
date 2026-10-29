@@ -341,6 +341,10 @@ export function openFeatures(
     openFeatureTab(tab);
 }
 
+export function openTrending() {
+    openFeatures("trending");
+}
+
 export function closeFeatures() {
     if (!modal) {
         return;
@@ -382,6 +386,11 @@ async function openFeatureTab(tab) {
 
     if (tab === "moods") {
         renderMoods();
+        return;
+    }
+
+    if (tab === "trending") {
+        await renderTrendingList();
         return;
     }
 
@@ -809,6 +818,35 @@ function renderMoods() {
                 }
             );
         });
+}
+
+async function renderTrendingList() {
+    content.innerHTML = loadingMarkup();
+
+    try {
+        const [firstPage, secondPage] = await Promise.all([
+            getTrending(1),
+            getTrending(2)
+        ]);
+        const unique = new Map();
+
+        [firstPage, secondPage].forEach((response) => {
+            (response?.results || []).forEach((item) => {
+                if (!item?.id || !["movie", "tv"].includes(item.media_type)) return;
+                const key = `${item.media_type}:${item.id}`;
+                if (!unique.has(key)) unique.set(key, item);
+            });
+        });
+
+        const results = [...unique.values()]
+            .filter((item) => item.poster_path || item.backdrop_path)
+            .slice(0, 40);
+
+        renderResults(results, "Trending around the world");
+    } catch (error) {
+        console.warn("MovieVerse full trending list failed:", error);
+        renderFeatureError();
+    }
 }
 
 async function renderSurprise() {
