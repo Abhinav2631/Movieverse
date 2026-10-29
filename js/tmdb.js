@@ -172,10 +172,11 @@ export async function getPersonDetails(personId) {
 }
 
 // HOME
-export async function getTrending() {
-    // Daily trends keep the homepage hero closer to current entertainment activity.
+export async function getTrending(page = 1) {
+    // Daily global trends are paginated; the hero loads two pages to rotate through 20 titles.
     return tmdbFetch("/trending/all/day", {
-        region: MOVIEVERSE_CONFIG.tmdbRegion
+        region: MOVIEVERSE_CONFIG.tmdbRegion,
+        page
     });
 }
 
