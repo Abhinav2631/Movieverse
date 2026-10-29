@@ -97,23 +97,23 @@ const DOMAINS = [
     {
         key: "sports",
         title: "Sports",
-        description: "Sports discovery",
+        description: "Sports films, teams, athletes, racing and documentaries",
         type: "search",
-        query: "sports"
+        queries: ["sports", "football", "cricket", "basketball", "Formula 1", "boxing"]
     },
     {
         key: "music",
         title: "Music & Performance",
-        description: "Music on screen",
+        description: "Concerts, musicians, bands and music stories",
         type: "search",
-        query: "music"
+        queries: ["music", "concert", "singer", "musical"]
     },
     {
         key: "dance",
         title: "Dance",
-        description: "Dance and movement",
+        description: "Dance films, performers and choreography",
         type: "search",
-        query: "dance"
+        queries: ["dance", "ballet", "dancer"]
     },
     {
         key: "comedy",
@@ -129,7 +129,7 @@ const DOMAINS = [
         title: "Reality & Talent",
         description: "Reality discovery",
         type: "search",
-        query: "reality"
+        queries: ["reality", "talent show", "competition series"]
     },
     {
         key: "docs",
@@ -154,14 +154,14 @@ const DOMAINS = [
         title: "Gaming & Esports",
         description: "Gaming worlds",
         type: "search",
-        query: "gaming"
+        queries: ["gaming", "video game", "esports", "gamer"]
     },
     {
         key: "education",
         title: "Educational",
         description: "Learn and explore",
         type: "search",
-        query: "education"
+        queries: ["science documentary", "history documentary", "educational documentary", "nature documentary"]
     }
 ];
 
@@ -1046,65 +1046,52 @@ function renderWatchMatch() {
 }
 
 async function loadDomain(key) {
-    const domain =
-        DOMAINS.find(
-            (entry) =>
-                entry.key === key
-        );
+    const domain = DOMAINS.find((entry) => entry.key === key);
+    if (!domain) return;
 
-    if (!domain) {
-        return;
-    }
+    content.innerHTML = loadingMarkup();
 
-    content.innerHTML =
-        loadingMarkup();
-
-    if (
-        domain.type === "search"
-    ) {
+    if (domain.type === "search") {
         try {
-            const response =
-                await searchMulti(
-                    domain.query
-                );
+            const queries = domain.queries || [domain.query].filter(Boolean);
+            const responses = await Promise.all(queries.map((query) => searchMulti(query)));
+            const unique = new Map();
 
-            const results =
-                (response.results ||
-                    [])
-                    .filter(
-                        (item) =>
-                            item.media_type ===
-                                "movie" ||
-                            item.media_type ===
-                                "tv"
-                    )
-                    .slice(0, 24);
+            responses.forEach((response) => {
+                (response?.results || []).forEach((item) => {
+                    if (!item?.id || !["movie", "tv"].includes(item.media_type)) return;
+                    const key = `${item.media_type}:${item.id}`;
+                    if (!unique.has(key)) unique.set(key, item);
+                });
+            });
 
-            renderResults(
-                results,
-                domain.title
-            );
-        } catch {
+            const results = [...unique.values()]
+                .sort((a, b) => (b.popularity || 0) - (a.popularity || 0))
+                .slice(0, 24);
+
+            renderResults(results, domain.title);
+        } catch (error) {
+            console.warn(`MovieVerse ${domain.title} discovery failed:`, error);
             renderFeatureError();
         }
-
         return;
     }
 
     if (domain.type === "tv") {
-        await loadDiscover(
-            {},
-            domain.title,
-            "tv"
-        );
-
+        await loadDiscover({}, domain.title, "tv");
         return;
     }
 
-    await loadDiscover(
-        domain.params,
-        domain.title
-    );
+    await loadDiscover(domain.params, domain.title);
+}
+
+/**
+ * Open a specific world directly from the homepage tiles, without leaving
+ * the user on the generic list of all worlds first.
+ */
+export function openDomain(key) {
+    openFeatures("domains");
+    return loadDomain(key);
 }
 
 async function loadDiscover(
