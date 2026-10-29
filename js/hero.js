@@ -150,14 +150,14 @@ function updateHero(item) {
             <span>↗</span>
         `;
 
-        heroButton.addEventListener("click", (event) => {
+        heroButton.onclick = (event) => {
             event.preventDefault();
 
             openDetails(
                 item.id,
                 item.media_type === "tv" ? "tv" : "movie"
             );
-        });
+        };
     }
 }
 
@@ -192,4 +192,6 @@ async function loadHero() {
 
 export function setupHero() {
     loadHero();
+    // Refresh the trending feature periodically so it reflects current TMDB trends.
+    window.setInterval(loadHero, 30 * 60 * 1000);
 }
