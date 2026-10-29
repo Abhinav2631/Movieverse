@@ -161,8 +161,16 @@ export async function getWatchProviderCatalog(
         mediaType === "tv"
             ? "/watch/providers/tv"
             : "/watch/providers/movie",
-        { watch_region: "IN" }
+        { watch_region: MOVIEVERSE_CONFIG.tmdbRegion || "IN" }
     );
+}
+
+export async function getMovieWatchProviders(movieId) {
+    return tmdbFetch(`/movie/${movieId}/watch/providers`);
+}
+
+export async function getTvWatchProviders(seriesId) {
+    return tmdbFetch(`/tv/${seriesId}/watch/providers`);
 }
 
 export async function getPersonDetails(personId) {
