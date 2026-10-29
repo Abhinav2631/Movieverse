@@ -830,7 +830,7 @@ function renderDetails(
                             ${
                                 director
                                     ? `
-                                        <div class="details-person">
+                                        <div class="details-person" tabindex="0" role="link" data-person-id="${escapeHTML(director.id || "")}" data-person-name="${escapeHTML(director.name || "")}" data-person-character="Director" title="Hover for details · click to search Google">
                                             <strong>
                                                 Director
                                             </strong>
@@ -848,7 +848,7 @@ function renderDetails(
                             ${
                                 creator
                                     ? `
-                                        <div class="details-person">
+                                        <div class="details-person" tabindex="0" role="link" data-person-id="${escapeHTML(creator.id || "")}" data-person-name="${escapeHTML(creator.name || "")}" data-person-character="Creator" title="Hover for details · click to search Google">
                                             <strong>
                                                 Creator
                                             </strong>
