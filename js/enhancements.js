@@ -4,7 +4,7 @@ import {
     getTvDetails,
     getPersonDetails
 } from "./tmdb.js";
-import { openFeatures, openMood } from "./features.js";
+import { openFeatures } from "./features.js";
 
 const escapeHTML = (value = "") => String(value)
     .replaceAll("&", "&amp;")
@@ -392,7 +392,12 @@ function setupMoodLinks() {
         button.dataset.mvMoodReady = "true";
         button.addEventListener("click", () => {
             const mood = button.textContent.replace(/[✦◌↗♡☾✺]/g, "").trim();
-            openMood(mood);
+            const moodMap = { Happy: "Happy", Thoughtful: "Thoughtful", Excited: "Excited", Romantic: "Romantic", Relaxed: "Relaxed", Scared: "Scary" };
+            openFeatures("moods");
+            window.setTimeout(() => {
+                const target = [...document.querySelectorAll("[data-mood]")].find((item) => item.dataset.mood === (moodMap[mood] || mood));
+                target?.click();
+            }, 100);
         });
     });
 }
