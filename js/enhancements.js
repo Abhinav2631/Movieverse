@@ -308,11 +308,33 @@ async function showTitleHover(card) {
         const rating = Number.isFinite(item.vote_average) ? item.vote_average.toFixed(1) : "—";
         const genres = (item.genres || []).map((genre) => genre.name).slice(0, 4).join(" · ");
         const overview = item.overview || "A synopsis is not available for this title yet.";
-        const runtime = item.runtime ? `${item.runtime} min` : (item.episode_run_time?.[0] ? `${item.episode_run_time[0]} min/episode` : "");
+        const movieMinutes = Number(item.runtime) || 0;
+        const episodeMinutes = Array.isArray(item.episode_run_time)
+            ? Number(item.episode_run_time.find((minutes) => Number(minutes) > 0)) || 0
+            : 0;
+        const formatMinutes = (minutes) => {
+            if (!minutes) return "";
+            const hours = Math.floor(minutes / 60);
+            const remainder = minutes % 60;
+            return hours
+                ? (remainder ? `${hours}h ${remainder}m` : `${hours}h`)
+                : `${remainder} min`;
+        };
+        const runtime = type === "tv"
+            ? (episodeMinutes ? `${formatMinutes(episodeMinutes)} per episode` : "Episode runtime TBA")
+            : (movieMinutes ? `${formatMinutes(movieMinutes)} (${movieMinutes} min)` : "Runtime TBA");
+        const seasons = type === "tv"
+            ? (Number.isFinite(item.number_of_seasons) ? `${item.number_of_seasons} season${item.number_of_seasons === 1 ? "" : "s"}` : "Seasons TBA")
+            : "";
+        const episodes = type === "tv"
+            ? (Number.isFinite(item.number_of_episodes) ? `${item.number_of_episodes.toLocaleString()} episode${item.number_of_episodes === 1 ? "" : "s"}` : "Episodes TBA")
+            : "";
+        const extraFacts = [runtime, seasons, episodes].filter(Boolean).join(" · ");
         popover.innerHTML = `
             <p class="mv-hover-kicker">${type === "tv" ? "Series preview" : "Movie preview"}</p>
             <h3>${escapeHTML(title)}</h3>
-            <div class="mv-hover-meta">${escapeHTML(year || "Release date TBA")} · ★ ${rating} TMDB${runtime ? ` · ${escapeHTML(runtime)}` : ""}</div>
+            <div class="mv-hover-meta">${escapeHTML(year || "Release date TBA")} · ★ ${rating} TMDB</div>
+            <div class="mv-hover-tags">${escapeHTML(extraFacts)}</div>
             <p>${escapeHTML(overview.slice(0, 420))}${overview.length > 420 ? "…" : ""}</p>
             ${genres ? `<div class="mv-hover-tags">${escapeHTML(genres)}</div>` : ""}
         `;
