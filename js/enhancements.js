@@ -348,7 +348,7 @@ async function showPersonHover(card) {
 
 function setupHoverDetails() {
     document.addEventListener("mouseover", (event) => {
-        const person = event.target.closest?.(".details-cast-card[data-person-id]");
+        const person = event.target.closest?.(".details-cast-card[data-person-id], .details-person[data-person-id]");
         if (person && !person.contains(event.relatedTarget)) {
             window.clearTimeout(hoverTimer);
             window.clearTimeout(personHoverTimer);
@@ -362,7 +362,7 @@ function setupHoverDetails() {
         hoverTimer = window.setTimeout(() => showTitleHover(card), 320);
     });
     document.addEventListener("mouseout", (event) => {
-        const target = event.target.closest?.(".details-cast-card[data-person-id], .movie-card[data-tmdb-id], .mv-result-card[data-result-id], .details-similar-card[data-similar-id]");
+        const target = event.target.closest?.(".details-cast-card[data-person-id], .details-person[data-person-id], .movie-card[data-tmdb-id], .mv-result-card[data-result-id], .details-similar-card[data-similar-id]");
         if (!target || target.contains(event.relatedTarget)) return;
         if (hoveredCard === target) hoveredCard = null;
         window.clearTimeout(hoverTimer);
@@ -370,7 +370,7 @@ function setupHoverDetails() {
         if (hoverPopover) hoverPopover.hidden = true;
     });
     document.addEventListener("click", (event) => {
-        const person = event.target.closest?.(".details-cast-card[data-person-name]");
+        const person = event.target.closest?.(".details-cast-card[data-person-name], .details-person[data-person-name]");
         if (person) {
             event.preventDefault();
             const query = [person.dataset.personName, person.dataset.personCharacter].filter(Boolean).join(" ");
