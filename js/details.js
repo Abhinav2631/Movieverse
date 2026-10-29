@@ -133,38 +133,81 @@ function getRegionProviders(item) {
     };
 }
 
-function createProviderCards(providers = []) {
-    return providers
-        .slice(0, 8)
-        .map((provider) => {
-            const name = escapeHTML(
-                provider.provider_name || "Provider"
-            );
+function getProviderDestination(providerName, title, availabilityUrl = "") {
+    const name = String(providerName || "").toLowerCase();
+    const query = encodeURIComponent(String(title || "").trim());
+    const routes = [
+        [/netflix/i, `https://www.netflix.com/search?q=${query}`],
+        [/amazon prime video|prime video/i, `https://www.primevideo.com/search/ref=atv_nb_sr?phrase=${query}`],
+        [/jiohotstar|disney.?hotstar|hotstar/i, `https://www.hotstar.com/in/search?q=${query}`],
+        [/zee\s*5|zee5/i, `https://www.zee5.com/search?q=${query}`],
+        [/\baha\b/i, `https://www.aha.video/search?q=${query}`],
+        [/sony\s*liv/i, `https://www.sonyliv.com/search?q=${query}`],
+        [/apple tv/i, `https://tv.apple.com/search?term=${query}`],
+        [/crunchyroll/i, `https://www.crunchyroll.com/search?q=${query}`]
+    ];
 
+    const match = routes.find(([pattern]) => pattern.test(name));
+    if (match) {
+        return {
+            url: match[1],
+            label: `Search ${title} on ${providerName}`,
+            exactTitleDeepLink: false
+        };
+    }
+
+    // TMDB's regional watch-provider endpoint supplies a JustWatch title page,
+    // not provider-specific playback URLs. Use that official title-specific page
+    // for providers whose own search URL cannot be confidently identified.
+    if (typeof availabilityUrl === "string" && /^https:\/\//i.test(availabilityUrl)) {
+        return {
+            url: availabilityUrl,
+            label: `Find ${title} on ${providerName} via the availability listing`,
+            exactTitleDeepLink: false
+        };
+    }
+
+    return {
+        url: `https://www.google.com/search?q=${encodeURIComponent(`${providerName} ${title} official streaming`)}`,
+        label: `Find ${title} on ${providerName}`,
+        exactTitleDeepLink: false
+    };
+}
+
+function createProviderCards(providers = [], title = "this title", availabilityUrl = "") {
+    return providers
+        .slice(0, 12)
+        .map((provider) => {
+            const providerName = String(provider.provider_name || "Streaming provider");
+            const name = escapeHTML(providerName);
             const logo = provider.logo_path
                 ? `https://image.tmdb.org/t/p/w92${provider.logo_path}`
                 : "";
+            const destination = getProviderDestination(providerName, title, availabilityUrl);
+            const url = escapeHTML(destination.url);
+            const label = escapeHTML(destination.label);
 
             return `
-                <div class="provider-card">
-                    <div class="provider-logo">
+                <a
+                    class="provider-card provider-card-link"
+                    href="${url}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="${label}"
+                    title="${label}"
+                >
+                    <span class="provider-logo">
                         ${
                             logo
-                                ? `
-                                    <img
-                                        src="${logo}"
-                                        alt="${name}"
-                                        loading="lazy"
-                                    >
-                                `
-                                : `
-                                    <span>MV</span>
-                                `
+                                ? `<img src="${logo}" alt="" loading="lazy">`
+                                : `<span aria-hidden="true">MV</span>`
                         }
-                    </div>
-
-                    <span>${name}</span>
-                </div>
+                    </span>
+                    <span class="provider-card-copy">
+                        <strong>${name}</strong>
+                        <small>Find this title ↗</small>
+                    </span>
+                </a>
             `;
         })
         .join("");
@@ -293,7 +336,9 @@ function renderWhereToWatch(item) {
 
                                 <div class="provider-grid">
                                     ${createProviderCards(
-                                        section.items
+                                        section.items,
+                                        getTitle(item),
+                                        providers.link
                                     )}
                                 </div>
                             </div>
