@@ -305,7 +305,7 @@ async function showTitleHover(card) {
         const item = detailCache.get(key);
         const title = item.title || item.name || card.getAttribute("aria-label") || "Untitled";
         const year = (item.release_date || item.first_air_date || "").slice(0, 4);
-        const rating = Number.isFinite(item.vote_average) ? item.vote_average.toFixed(1) : "—";
+        const rating = Number.isFinite(item.vote_average) && item.vote_average > 0 ? item.vote_average.toFixed(1) : "—";
         const genres = (item.genres || []).map((genre) => genre.name).slice(0, 4).join(" · ");
         const overview = item.overview || "A synopsis is not available for this title yet.";
         const movieMinutes = Number(item.runtime) || 0;
