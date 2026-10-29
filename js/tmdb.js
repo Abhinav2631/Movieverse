@@ -179,7 +179,7 @@ export async function getPersonDetails(personId) {
 
 // HOME
 export async function getTrending(page = 1) {
-    // Daily global trends are paginated; the hero loads two pages to rotate through 20 titles.
+    // Daily global trends are paginated; the hero loads three pages to fill a 20-title carousel after filtering.
     return tmdbFetch("/trending/all/day", {
         region: MOVIEVERSE_CONFIG.tmdbRegion,
         page
