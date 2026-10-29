@@ -1267,6 +1267,10 @@ export function setupDetails() {
     document.addEventListener(
         "click",
         (event) => {
+            if (event.target.closest("[data-imdb-search]")) {
+                return;
+            }
+
             const card =
                 event.target.closest(
                     ".movie-card[data-tmdb-id]"
