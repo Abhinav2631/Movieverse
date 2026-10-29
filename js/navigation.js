@@ -1,5 +1,6 @@
 import {
-    openFeatures
+    openFeatures,
+    openDomain
 } from "./features.js";
 
 function scrollToSection(
@@ -181,42 +182,23 @@ function setupSectionLinks() {
                                 .trim()
                                 .toLowerCase();
 
-                        if (
-                            text.includes(
-                                "browse movies"
-                            )
-                        ) {
-                            openFeatures(
-                                "domains"
-                            );
-
+                        if (text.includes("browse movies")) {
+                            openDomain("movies");
                             return;
                         }
 
-                        if (
-                            text.includes(
-                                "browse series"
-                            )
-                        ) {
-                            openFeatures(
-                                "domains"
-                            );
-
+                        if (text.includes("browse series")) {
+                            openDomain("series");
                             return;
                         }
 
-                        if (
-                            text.includes(
-                                "genre"
-                            ) ||
-                            text.includes(
-                                "rankings"
-                            )
-                        ) {
-                            openFeatures(
-                                "genres"
-                            );
+                        if (text.includes("rankings")) {
+                            scrollToSection("top-rated");
+                            return;
+                        }
 
+                        if (text.includes("genre")) {
+                            openFeatures("genres");
                             return;
                         }
 
@@ -252,22 +234,17 @@ function setupSectionLinks() {
                                 })
                             );
 
+                            scrollToSection("upcoming-releases");
+
                             showToast(
-                                "MovieVerse reminder preference saved for this demo."
+                                "Reminder preference saved in this browser. This static demo cannot send real notifications."
                             );
 
                             return;
                         }
 
-                        if (
-                            text.includes(
-                                "what's new"
-                            )
-                        ) {
-                            scrollToSection(
-                                "trending"
-                            );
-
+                        if (text.includes("what's new")) {
+                            scrollToSection("now-playing");
                             return;
                         }
 
@@ -494,6 +471,13 @@ function setupCredits() {
 export function setupNavigation({
     showProfiles
 }) {
+    // These screen-local logos are decorative; do not let href="#" jump the page.
+    document
+        .querySelectorAll(".onboarding-top .brand, .profile-top .brand")
+        .forEach((brand) => {
+            brand.addEventListener("click", (event) => event.preventDefault());
+        });
+
     setupProfileChip(
         showProfiles
     );
