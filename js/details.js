@@ -47,19 +47,40 @@ function getYear(item) {
     return date ? date.slice(0, 4) : "—";
 }
 
-function formatRuntime(item) {
-    if (item?.runtime) {
-        return `${item.runtime} min`;
+function formatDuration(minutes, suffix = "") {
+    const value = Number(minutes);
+
+    if (!Number.isFinite(value) || value <= 0) {
+        return "Not announced";
     }
 
-    if (
-        Array.isArray(item?.episode_run_time) &&
-        item.episode_run_time[0]
-    ) {
-        return `${item.episode_run_time[0]} min/ep`;
+    const hours = Math.floor(value / 60);
+    const remainder = value % 60;
+    const readable = hours
+        ? (remainder ? `${hours}h ${remainder}m` : `${hours}h`)
+        : `${remainder} min`;
+
+    return suffix
+        ? `${readable} ${suffix} (${value} min)`
+        : `${readable} (${value} min)`;
+}
+
+function formatRuntime(item, mediaType = "movie") {
+    if (mediaType === "tv") {
+        const episodeLength = Array.isArray(item?.episode_run_time)
+            ? item.episode_run_time.find((minutes) => Number(minutes) > 0)
+            : null;
+
+        return episodeLength
+            ? formatDuration(episodeLength, "per episode")
+            : "Not announced";
     }
 
-    return "Runtime unavailable";
+    if (Number(item?.runtime) > 0) {
+        return formatDuration(item.runtime);
+    }
+
+    return "Not announced";
 }
 
 function formatGenres(item) {
@@ -472,7 +493,7 @@ function renderDetails(
 
     const title = getTitle(item);
     const year = getYear(item);
-    const runtime = formatRuntime(item);
+    const runtime = formatRuntime(item, mediaType);
     const genres = formatGenres(item);
 
     const rating = Number.isFinite(
@@ -636,9 +657,14 @@ function renderDetails(
                         }
                     </span>
 
-                    <span>
+                    <span title="${mediaType === "tv" ? "Typical episode runtime" : "Full movie runtime"}">
                         ${escapeHTML(runtime)}
                     </span>
+
+                    ${mediaType === "tv" ? `
+                        <span>${Number.isFinite(item?.number_of_seasons) ? `${item.number_of_seasons} season${item.number_of_seasons === 1 ? "" : "s"}` : "Seasons TBA"}</span>
+                        <span>${Number.isFinite(item?.number_of_episodes) ? `${item.number_of_episodes} episode${item.number_of_episodes === 1 ? "" : "s"}` : "Episodes TBA"}</span>
+                    ` : ""}
                 </div>
 
                 ${
@@ -798,13 +824,25 @@ function renderDetails(
 
                 <div>
                     <span class="details-label">
-                        Runtime
+                        ${mediaType === "tv" ? "Episode runtime" : "Movie runtime"}
                     </span>
 
                     <strong>
                         ${escapeHTML(runtime)}
                     </strong>
                 </div>
+
+                ${mediaType === "tv" ? `
+                    <div>
+                        <span class="details-label">Seasons</span>
+                        <strong>${Number.isFinite(item?.number_of_seasons) ? item.number_of_seasons : "TBA"}</strong>
+                    </div>
+
+                    <div>
+                        <span class="details-label">Episodes</span>
+                        <strong>${Number.isFinite(item?.number_of_episodes) ? item.number_of_episodes.toLocaleString() : "TBA"}</strong>
+                    </div>
+                ` : ""}
             </div>
         </section>
 
