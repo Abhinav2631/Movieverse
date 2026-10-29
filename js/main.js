@@ -174,6 +174,8 @@ export function logout() {
         );
 }
 
+window.movieverseLogout = logout;
+
 document.addEventListener(
     "DOMContentLoaded",
     () => {
