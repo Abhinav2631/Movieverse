@@ -484,6 +484,11 @@ function renderDetails(
         ? item.vote_count.toLocaleString()
         : "—";
 
+    const imdbId = item?.external_ids?.imdb_id || item?.imdb_id || "";
+    const imdbUrl = imdbId
+        ? `https://www.imdb.com/title/${encodeURIComponent(imdbId)}/`
+        : `https://www.imdb.com/find/?q=${encodeURIComponent(title)}`;
+
     const overview =
         item?.overview ||
         "No overview is currently available for this title.";
@@ -608,9 +613,13 @@ function renderDetails(
                         ${escapeHTML(year)}
                     </span>
 
-                    <span>
-                        ★ ${rating}
+                    <span title="Rating provided by TMDB">
+                        ★ ${rating} TMDB
                     </span>
+
+                    <a class="details-imdb-link" href="${escapeHTML(imdbUrl)}" target="_blank" rel="noopener noreferrer" aria-label="Open ${escapeHTML(title)} on IMDb">
+                        IMDb page ↗
+                    </a>
 
                     <span>
                         ${
@@ -742,12 +751,13 @@ function renderDetails(
             <div class="details-info-grid">
                 <div>
                     <span class="details-label">
-                        Rating
+                        TMDB rating
                     </span>
 
                     <strong>
-                        ★ ${rating}
+                        ★ ${rating} / 10
                     </strong>
+                    <a class="details-imdb-link" href="${escapeHTML(imdbUrl)}" target="_blank" rel="noopener noreferrer">Check IMDb ↗</a>
                 </div>
 
                 <div>
@@ -870,6 +880,13 @@ function renderDetails(
                                     return `
                                         <article
                                             class="details-cast-card"
+                                            tabindex="0"
+                                            role="link"
+                                            data-person-id="${escapeHTML(person.id || "")}"
+                                            data-person-name="${escapeHTML(person.name || "")}"
+                                            data-person-character="${escapeHTML(person.character || "")}"
+                                            title="Hover for cast details · click to search Google"
+                                            aria-label="More about ${escapeHTML(person.name || "cast member")}"
                                         >
                                             <div
                                                 class="details-cast-image"
