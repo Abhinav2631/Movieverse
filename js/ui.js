@@ -105,7 +105,7 @@ function getYear(item) {
 }
 
 function getRating(item) {
-    return Number.isFinite(item.vote_average)
+    return Number.isFinite(item.vote_average) && item.vote_average > 0
         ? item.vote_average.toFixed(1)
         : "—";
 }
