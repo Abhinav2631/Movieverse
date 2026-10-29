@@ -346,7 +346,7 @@ function renderWhereToWatch(item) {
                 </span>
             </div>
 
-            <p class="provider-redirect-hint">Select a service to search for this title. Availability and playback can depend on your region and subscription.</p>
+            <p class="provider-redirect-hint">Streaming availability provided by TMDB/JustWatch. Select a service to search for this title; the catalogue and playback can depend on your region and subscription.</p>
 
             <div class="provider-groups">
                 ${availableSections
