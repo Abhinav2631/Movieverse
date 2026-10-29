@@ -39,6 +39,10 @@ const railLoaders = {
         null
 };
 
+let lastRailsRefreshAt = 0;
+let railRefreshInterval = null;
+let railVisibilityRefreshBound = false;
+
 const escapeHTML = (
     value = ""
 ) =>
@@ -95,38 +99,15 @@ function getType(
     return "Movie";
 }
 
-function getYear(
-    item,
-    index
-) {
-    const date =
-        item.release_date ||
-        item.first_air_date;
-
-    return date
-        ? date.slice(0, 4)
-        : String(
-              2022 +
-                  (index %
-                      5)
-          );
+function getYear(item) {
+    const date = item.release_date || item.first_air_date;
+    return date ? date.slice(0, 4) : "—";
 }
 
-function getRating(
-    item,
-    index
-) {
-    return Number.isFinite(
-        item.vote_average
-    )
-        ? item.vote_average.toFixed(
-              1
-          )
-        : (
-              7.4 +
-              index /
-                  10
-          ).toFixed(1);
+function getRating(item) {
+    return Number.isFinite(item.vote_average)
+        ? item.vote_average.toFixed(1)
+        : "—";
 }
 
 function getFallback(
@@ -170,17 +151,9 @@ function createMovieCard(
             section
         );
 
-    const year =
-        getYear(
-            item,
-            index
-        );
+    const year = getYear(item);
 
-    const rating =
-        getRating(
-            item,
-            index
-        );
+    const rating = getRating(item);
 
     const fallback =
         getFallback(
@@ -304,9 +277,10 @@ function createMovieCard(
                         )}
                     </span>
 
-                    <span>
-                        ★ ${rating}
+                    <span title="Rating supplied by TMDB">
+                        ★ ${rating} TMDB
                     </span>
+                    <a class="movie-imdb-link" data-imdb-search href="https://www.imdb.com/find/?q=${encodeURIComponent(title)}" target="_blank" rel="noopener noreferrer" aria-label="Find ${escapeHTML(title)} on IMDb">IMDb ↗</a>
                 </div>
             </div>
         </article>
@@ -353,6 +327,8 @@ function renderFallbackRail(
 }
 
 export async function renderRails() {
+    lastRailsRefreshAt = Date.now();
+
     const rails =
         document.querySelectorAll(
             "[data-rail]"
@@ -414,10 +390,12 @@ export async function renderRails() {
                         )
                             ? data.results
                                   .filter(
-                                      (
-                                          item
-                                      ) =>
-                                          item.id
+                                      (item) =>
+                                          item.id &&
+                                          (
+                                              section !== "trending" ||
+                                              ["movie", "tv"].includes(item.media_type)
+                                          )
                                   )
                             : [];
 
@@ -493,6 +471,36 @@ export function setupHomeInteractions() {
 
     header.dataset.ready =
         "true";
+
+    // Refresh live TMDB home rails on a 30-minute cadence while the app is visible.
+    // If the tab was hidden for a while, refresh when the user returns to it.
+    if (!railRefreshInterval) {
+        railRefreshInterval = window.setInterval(() => {
+            const appShell = document.getElementById("app-shell");
+            if (
+                appShell &&
+                !appShell.hidden &&
+                document.visibilityState === "visible"
+            ) {
+                renderRails();
+            }
+        }, 30 * 60 * 1000);
+    }
+
+    if (!railVisibilityRefreshBound) {
+        document.addEventListener("visibilitychange", () => {
+            const appShell = document.getElementById("app-shell");
+            if (
+                document.visibilityState === "visible" &&
+                appShell &&
+                !appShell.hidden &&
+                Date.now() - lastRailsRefreshAt >= 30 * 60 * 1000
+            ) {
+                renderRails();
+            }
+        });
+        railVisibilityRefreshBound = true;
+    }
 
     window.addEventListener(
         "scroll",

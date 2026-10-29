@@ -380,4 +380,17 @@ export function setupPersonalization() {
         "movieverse:library-updated",
         renderPersonalized
     );
+
+    window.addEventListener(
+        "movieverse:refresh-recommendations",
+        async () => {
+            await renderPersonalized();
+            document
+                .getElementById("personalized-discovery")
+                ?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start"
+                });
+        }
+    );
 }

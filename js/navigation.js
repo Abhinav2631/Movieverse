@@ -1,5 +1,7 @@
 import {
-    openFeatures
+    openFeatures,
+    openDomain,
+    openTrending
 } from "./features.js";
 
 function scrollToSection(
@@ -181,60 +183,36 @@ function setupSectionLinks() {
                                 .trim()
                                 .toLowerCase();
 
-                        if (
-                            text.includes(
-                                "browse movies"
-                            )
-                        ) {
-                            openFeatures(
-                                "domains"
-                            );
+                        if (text.includes("browse movies")) {
+                            openDomain("movies");
+                            return;
+                        }
 
+                        if (text.includes("browse series")) {
+                            openDomain("series");
+                            return;
+                        }
+
+                        if (text.includes("rankings")) {
+                            scrollToSection("top-rated");
+                            return;
+                        }
+
+                        if (text.includes("genre")) {
+                            openFeatures("genres");
+                            return;
+                        }
+
+                        if (text.includes("full orbit")) {
+                            openTrending();
                             return;
                         }
 
                         if (
-                            text.includes(
-                                "browse series"
-                            )
+                            text.includes("explore all") ||
+                            text.includes("collections")
                         ) {
-                            openFeatures(
-                                "domains"
-                            );
-
-                            return;
-                        }
-
-                        if (
-                            text.includes(
-                                "genre"
-                            ) ||
-                            text.includes(
-                                "rankings"
-                            )
-                        ) {
-                            openFeatures(
-                                "genres"
-                            );
-
-                            return;
-                        }
-
-                        if (
-                            text.includes(
-                                "full orbit"
-                            ) ||
-                            text.includes(
-                                "explore all"
-                            ) ||
-                            text.includes(
-                                "collections"
-                            )
-                        ) {
-                            openFeatures(
-                                "domains"
-                            );
-
+                            openFeatures("domains");
                             return;
                         }
 
@@ -252,22 +230,17 @@ function setupSectionLinks() {
                                 })
                             );
 
+                            scrollToSection("upcoming-releases");
+
                             showToast(
-                                "MovieVerse reminder preference saved for this demo."
+                                "Reminder preference saved in this browser. This static demo cannot send real notifications."
                             );
 
                             return;
                         }
 
-                        if (
-                            text.includes(
-                                "what's new"
-                            )
-                        ) {
-                            scrollToSection(
-                                "trending"
-                            );
-
+                        if (text.includes("what's new")) {
+                            scrollToSection("now-playing");
                             return;
                         }
 

@@ -15,6 +15,8 @@ import {
 
 import { openDetails } from "./details.js";
 
+import { MOVIEVERSE_CONFIG } from "../config/config.js";
+
 const LANGUAGE_CODES = {
     English: "en",
     Hindi: "hi",
@@ -74,7 +76,7 @@ const DOMAINS = [
         key: "movies",
         title: "Movies",
         description: "Big-screen stories",
-        type: "discover",
+        type: "movie",
         params: {}
     },
     {
@@ -97,23 +99,23 @@ const DOMAINS = [
     {
         key: "sports",
         title: "Sports",
-        description: "Sports discovery",
+        description: "Sports films, teams, athletes, racing and documentaries",
         type: "search",
-        query: "sports"
+        queries: ["sports", "football", "cricket", "basketball", "Formula 1", "boxing"]
     },
     {
         key: "music",
         title: "Music & Performance",
-        description: "Music on screen",
+        description: "Concerts, musicians, bands and music stories",
         type: "search",
-        query: "music"
+        queries: ["music", "concert", "singer", "musical"]
     },
     {
         key: "dance",
         title: "Dance",
-        description: "Dance and movement",
+        description: "Dance films, performers and choreography",
         type: "search",
-        query: "dance"
+        queries: ["dance", "ballet", "dancer"]
     },
     {
         key: "comedy",
@@ -129,7 +131,7 @@ const DOMAINS = [
         title: "Reality & Talent",
         description: "Reality discovery",
         type: "search",
-        query: "reality"
+        queries: ["reality", "talent show", "competition series"]
     },
     {
         key: "docs",
@@ -154,14 +156,14 @@ const DOMAINS = [
         title: "Gaming & Esports",
         description: "Gaming worlds",
         type: "search",
-        query: "gaming"
+        queries: ["gaming", "video game", "esports", "gamer"]
     },
     {
         key: "education",
         title: "Educational",
         description: "Learn and explore",
         type: "search",
-        query: "education"
+        queries: ["science documentary", "history documentary", "educational documentary", "nature documentary"]
     }
 ];
 
@@ -341,6 +343,10 @@ export function openFeatures(
     openFeatureTab(tab);
 }
 
+export function openTrending() {
+    openFeatures("trending");
+}
+
 export function closeFeatures() {
     if (!modal) {
         return;
@@ -382,6 +388,11 @@ async function openFeatureTab(tab) {
 
     if (tab === "moods") {
         renderMoods();
+        return;
+    }
+
+    if (tab === "trending") {
+        await renderTrendingList();
         return;
     }
 
@@ -644,13 +655,30 @@ async function renderOTT() {
             );
         });
 
+        const preferredProviders = [
+            /netflix/i,
+            /amazon prime video|prime video/i,
+            /jiohotstar|disney.?hotstar|hotstar/i,
+            /^zee5$/i,
+            /^aha$/i,
+            /sony liv/i,
+            /apple tv/i,
+            /crunchyroll/i,
+            /sun nxt/i,
+            /lionsgate play/i,
+            /hoichoi/i,
+            /manoramamax/i
+        ];
+        const providerPriority = (name = "") => {
+            const index = preferredProviders.findIndex((pattern) => pattern.test(name));
+            return index < 0 ? preferredProviders.length : index;
+        };
         const sorted = [
             ...providers.values()
-        ].sort((a, b) =>
-            a.provider_name.localeCompare(
-                b.provider_name
-            )
-        );
+        ].sort((a, b) => {
+            const priorityDifference = providerPriority(a.provider_name) - providerPriority(b.provider_name);
+            return priorityDifference || a.provider_name.localeCompare(b.provider_name);
+        });
 
         content.innerHTML = `
             <div class="mv-feature-intro">
@@ -720,7 +748,7 @@ async function renderOTT() {
                                         .providerId,
 
                                 watch_region:
-                                    "IN",
+                                    (MOVIEVERSE_CONFIG.tmdbRegion || "IN"),
 
                                 with_watch_monetization_types:
                                     "flatrate|free|ads"
@@ -792,6 +820,35 @@ function renderMoods() {
                 }
             );
         });
+}
+
+async function renderTrendingList() {
+    content.innerHTML = loadingMarkup();
+
+    try {
+        const [firstPage, secondPage] = await Promise.all([
+            getTrending(1),
+            getTrending(2)
+        ]);
+        const unique = new Map();
+
+        [firstPage, secondPage].forEach((response) => {
+            (response?.results || []).forEach((item) => {
+                if (!item?.id || !["movie", "tv"].includes(item.media_type)) return;
+                const key = `${item.media_type}:${item.id}`;
+                if (!unique.has(key)) unique.set(key, item);
+            });
+        });
+
+        const results = [...unique.values()]
+            .filter((item) => item.poster_path || item.backdrop_path)
+            .slice(0, 40);
+
+        renderResults(results, "Trending around the world");
+    } catch (error) {
+        console.warn("MovieVerse full trending list failed:", error);
+        renderFeatureError();
+    }
 }
 
 async function renderSurprise() {
@@ -1029,65 +1086,57 @@ function renderWatchMatch() {
 }
 
 async function loadDomain(key) {
-    const domain =
-        DOMAINS.find(
-            (entry) =>
-                entry.key === key
-        );
+    const domain = DOMAINS.find((entry) => entry.key === key);
+    if (!domain) return;
 
-    if (!domain) {
-        return;
-    }
+    content.innerHTML = loadingMarkup();
 
-    content.innerHTML =
-        loadingMarkup();
-
-    if (
-        domain.type === "search"
-    ) {
+    if (domain.type === "search") {
         try {
-            const response =
-                await searchMulti(
-                    domain.query
-                );
+            const queries = domain.queries || [domain.query].filter(Boolean);
+            const responses = await Promise.all(queries.map((query) => searchMulti(query)));
+            const unique = new Map();
 
-            const results =
-                (response.results ||
-                    [])
-                    .filter(
-                        (item) =>
-                            item.media_type ===
-                                "movie" ||
-                            item.media_type ===
-                                "tv"
-                    )
-                    .slice(0, 24);
+            responses.forEach((response) => {
+                (response?.results || []).forEach((item) => {
+                    if (!item?.id || !["movie", "tv"].includes(item.media_type)) return;
+                    const key = `${item.media_type}:${item.id}`;
+                    if (!unique.has(key)) unique.set(key, item);
+                });
+            });
 
-            renderResults(
-                results,
-                domain.title
-            );
-        } catch {
+            const results = [...unique.values()]
+                .sort((a, b) => (b.popularity || 0) - (a.popularity || 0))
+                .slice(0, 24);
+
+            renderResults(results, domain.title);
+        } catch (error) {
+            console.warn(`MovieVerse ${domain.title} discovery failed:`, error);
             renderFeatureError();
         }
-
         return;
     }
 
     if (domain.type === "tv") {
-        await loadDiscover(
-            {},
-            domain.title,
-            "tv"
-        );
-
+        await loadDiscover({}, domain.title, "tv");
         return;
     }
 
-    await loadDiscover(
-        domain.params,
-        domain.title
-    );
+    if (domain.type === "movie") {
+        await loadDiscover({}, domain.title, "movie");
+        return;
+    }
+
+    await loadDiscover(domain.params, domain.title);
+}
+
+/**
+ * Open a specific world directly from the homepage tiles, without leaving
+ * the user on the generic list of all worlds first.
+ */
+export function openDomain(key) {
+    openFeatures("domains");
+    return loadDomain(key);
 }
 
 async function loadDiscover(
@@ -1958,119 +2007,68 @@ function setupExternalTriggers() {
             element.addEventListener(
                 "click",
                 () => {
-                    const raw =
-                        element.textContent
-                            .trim()
-                            .toLowerCase();
+                    const raw = element.textContent.trim().toLowerCase();
+                    // Movie and TV genre catalogs use different IDs for some broad genres.
+                    // Pipe-separated IDs let each discovery endpoint match its own valid genre.
+                    const genreIds = {
+                        "sci-fi": "878|10765",
+                        thriller: "53|9648",
+                        comedy: "35",
+                        animation: "16",
+                        fantasy: "14|10765",
+                        drama: "18",
+                        crime: "80",
+                        romance: "10749|18"
+                    };
+                    const genreNames = {
+                        "sci-fi": "Science Fiction",
+                        thriller: "Thriller",
+                        comedy: "Comedy",
+                        animation: "Animation",
+                        fantasy: "Fantasy",
+                        drama: "Drama",
+                        crime: "Crime",
+                        romance: "Romance"
+                    };
+                    const genreId = genreIds[raw];
+                    if (!genreId) return;
 
-                    const mapped =
-                        raw === "sci-fi"
-                            ? "science fiction"
-                            : raw;
-
-                    openFeatures(
-                        "genres"
-                    );
-
-                    window.setTimeout(
-                        async () => {
-                            try {
-                                const [
-                                    movies,
-                                    tv
-                                ] =
-                                    await Promise.all(
-                                        [
-                                            getMovieGenres(),
-                                            getTvGenres()
-                                        ]
-                                    );
-
-                                const all = [
-                                    ...(movies.genres ||
-                                        []),
-                                    ...(tv.genres ||
-                                        [])
-                                ];
-
-                                const genre =
-                                    all.find(
-                                        (
-                                            item
-                                        ) =>
-                                            item.name
-                                                .toLowerCase() ===
-                                            mapped
-                                    );
-
-                                if (genre) {
-                                    loadDiscover(
-                                        {
-                                            with_genres:
-                                                genre.id
-                                        },
-                                        genre.name
-                                    );
-                                }
-                            } catch {
-                                renderFeatureError();
-                            }
-                        },
-                        50
-                    );
+                    openFeatures("genres");
+                    window.setTimeout(() => {
+                        loadDiscover(
+                            { with_genres: genreId },
+                            genreNames[raw]
+                        );
+                    }, 50);
                 }
             );
         });
 
     document
-        .querySelectorAll(
-            ".domain-tile"
-        )
+        .querySelectorAll(".domain-tile")
         .forEach((tile) => {
-            tile.addEventListener(
-                "click",
-                (event) => {
-                    event.preventDefault();
+            tile.addEventListener("click", (event) => {
+                event.preventDefault();
 
-                    const className =
-                        [...tile.classList].find(
-                            (item) =>
-                                item.startsWith(
-                                    "domain-"
-                                )
-                        );
+                const className = [...tile.classList].find((item) =>
+                    item.startsWith("domain-")
+                );
+                const map = {
+                    "domain-anime": "anime",
+                    "domain-sports": "sports",
+                    "domain-music": "music",
+                    "domain-docs": "docs",
+                    "domain-comedy": "comedy"
+                };
+                const key = map[className];
 
-                    const map = {
-                        "domain-anime":
-                            "anime",
-                        "domain-sports":
-                            "sports",
-                        "domain-music":
-                            "music",
-                        "domain-docs":
-                            "docs",
-                        "domain-comedy":
-                            "comedy"
-                    };
-
-                    openFeatures(
-                        "domains"
-                    );
-
-                    const key =
-                        map[className];
-
-                    if (key) {
-                        window.setTimeout(
-                            () =>
-                                loadDomain(
-                                    key
-                                ),
-                            50
-                        );
-                    }
+                if (key) {
+                    // Render that world's results immediately; don't leave the modal on the generic world-picker.
+                    openDomain(key);
+                } else {
+                    openFeatures("domains");
                 }
-            );
+            });
         });
 
     document

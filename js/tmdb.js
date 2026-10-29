@@ -120,23 +120,21 @@ export async function discoverBoth(params = {}) {
         discoverMedia("tv", params)
     ]);
 
+    // Movie and TV catalogs have separate ID namespaces; preserve the media type
+    // before deduplicating so an ID collision does not discard a valid result.
     const combined = [
-        ...(movies?.results || []),
-        ...(tv?.results || [])
+        ...(movies?.results || []).map((item) => ({ ...item, media_type: "movie" })),
+        ...(tv?.results || []).map((item) => ({ ...item, media_type: "tv" }))
     ];
 
     const unique = new Map();
 
     combined.forEach((item) => {
-        const key = item?.id ?? `${item?.title || item?.name || "unknown"}-${item?.media_type || "item"}`;
+        const identity = item?.id ?? `${item?.title || item?.name || "unknown"}`;
+        const key = `${item?.media_type || "movie"}:${identity}`;
 
         if (!unique.has(key)) {
-            unique.set(key, {
-                ...item,
-                media_type:
-                    item?.media_type ||
-                    (item?.first_air_date ? "tv" : "movie")
-            });
+            unique.set(key, item);
         }
     });
 
@@ -160,8 +158,17 @@ export async function getWatchProviderCatalog(
     return tmdbFetch(
         mediaType === "tv"
             ? "/watch/providers/tv"
-            : "/watch/providers/movie"
+            : "/watch/providers/movie",
+        { watch_region: MOVIEVERSE_CONFIG.tmdbRegion || "IN" }
     );
+}
+
+export async function getMovieWatchProviders(movieId) {
+    return tmdbFetch(`/movie/${movieId}/watch/providers`);
+}
+
+export async function getTvWatchProviders(seriesId) {
+    return tmdbFetch(`/tv/${seriesId}/watch/providers`);
 }
 
 export async function getPersonDetails(personId) {
@@ -171,9 +178,11 @@ export async function getPersonDetails(personId) {
 }
 
 // HOME
-export async function getTrending() {
-    return tmdbFetch("/trending/all/week", {
-        region: MOVIEVERSE_CONFIG.tmdbRegion
+export async function getTrending(page = 1) {
+    // Daily global trends are paginated; the hero loads three pages to fill a 20-title carousel after filtering.
+    return tmdbFetch("/trending/all/day", {
+        region: MOVIEVERSE_CONFIG.tmdbRegion,
+        page
     });
 }
 
@@ -210,13 +219,13 @@ export async function getUpcomingMovies() {
 // DETAILS
 export async function getMovieDetails(id) {
     return tmdbFetch(`/movie/${id}`, {
-        append_to_response: "watch/providers,images"
+        append_to_response: "watch/providers,images,external_ids"
     });
 }
 
 export async function getTvDetails(id) {
     return tmdbFetch(`/tv/${id}`, {
-        append_to_response: "watch/providers,images"
+        append_to_response: "watch/providers,images,external_ids"
     });
 }
 

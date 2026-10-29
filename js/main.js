@@ -172,7 +172,13 @@ export function logout() {
         ?.classList.add(
             "active"
         );
+
+    // Reinitialize the page from an unauthenticated state. This also removes any
+    // stale profile/app UI that might survive a client-side transition.
+    window.location.replace(window.location.pathname);
 }
+
+window.movieverseLogout = logout;
 
 document.addEventListener(
     "DOMContentLoaded",

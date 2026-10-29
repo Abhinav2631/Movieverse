@@ -1069,6 +1069,15 @@ function setupEditor() {
                 closeEditor();
                 renderProfiles();
 
+                if (!existing) {
+                    window.dispatchEvent(
+                        new CustomEvent(
+                            "movieverse:new-profile-created",
+                            { detail: next }
+                        )
+                    );
+                }
+
                 const active =
                     getActiveProfile();
 

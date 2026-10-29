@@ -4,7 +4,9 @@ import {
     getCredits,
     getVideos,
     getSimilar,
-    getPosterUrl
+    getPosterUrl,
+    getMovieWatchProviders,
+    getTvWatchProviders
 } from "./tmdb.js";
 
 import { MOVIEVERSE_CONFIG } from "../config/config.js";
@@ -16,7 +18,10 @@ import {
     isInMyList,
     isInWishlist,
     isWatched,
-    addRecentlyViewed
+    addRecentlyViewed,
+    getContinueWatching,
+    setContinueWatching,
+    removeContinueWatching
 } from "./library.js";
 
 let detailsModal = null;
@@ -44,19 +49,40 @@ function getYear(item) {
     return date ? date.slice(0, 4) : "—";
 }
 
-function formatRuntime(item) {
-    if (item?.runtime) {
-        return `${item.runtime} min`;
+function formatDuration(minutes, suffix = "") {
+    const value = Number(minutes);
+
+    if (!Number.isFinite(value) || value <= 0) {
+        return "Not announced";
     }
 
-    if (
-        Array.isArray(item?.episode_run_time) &&
-        item.episode_run_time[0]
-    ) {
-        return `${item.episode_run_time[0]} min/ep`;
+    const hours = Math.floor(value / 60);
+    const remainder = value % 60;
+    const readable = hours
+        ? (remainder ? `${hours}h ${remainder}m` : `${hours}h`)
+        : `${remainder} min`;
+
+    return suffix
+        ? `${readable} ${suffix}`
+        : `${readable} (${value} min)`;
+}
+
+function formatRuntime(item, mediaType = "movie") {
+    if (mediaType === "tv") {
+        const episodeLength = Array.isArray(item?.episode_run_time)
+            ? item.episode_run_time.find((minutes) => Number(minutes) > 0)
+            : null;
+
+        return episodeLength
+            ? formatDuration(episodeLength, "per episode")
+            : "Not announced";
     }
 
-    return "Runtime unavailable";
+    if (Number(item?.runtime) > 0) {
+        return formatDuration(item.runtime);
+    }
+
+    return "Not announced";
 }
 
 function formatGenres(item) {
@@ -90,7 +116,7 @@ function findTrailer(videos) {
 
 function getRegionProviders(item) {
     const region =
-        MOVIEVERSE_CONFIG.tmdbRegion || "US";
+        MOVIEVERSE_CONFIG.tmdbRegion || "IN";
 
     const providerData =
         item?.["watch/providers"]?.results?.[region];
@@ -109,38 +135,102 @@ function getRegionProviders(item) {
     };
 }
 
-function createProviderCards(providers = []) {
-    return providers
-        .slice(0, 8)
-        .map((provider) => {
-            const name = escapeHTML(
-                provider.provider_name || "Provider"
-            );
+function getProviderDestination(providerName, title, availabilityUrl = "") {
+    const name = String(providerName || "").toLowerCase();
+    const query = encodeURIComponent(String(title || "").trim());
 
+    // Branded channels inside another platform (for example, "Aha Amazon Channel")
+    // are not the same destination as the standalone provider. Keep those on the
+    // title-specific availability page so we do not send users to the wrong app.
+    const isThirdPartyChannel = /amazon channel/i.test(name);
+    if (isThirdPartyChannel) {
+        if (typeof availabilityUrl === "string" && /^https:\/\//i.test(availabilityUrl)) {
+            return {
+                url: availabilityUrl,
+                label: `Find ${title} on ${providerName} via the availability listing`,
+                exactTitleDeepLink: false
+            };
+        }
+
+        return {
+            url: `https://www.google.com/search?q=${encodeURIComponent(`${providerName} ${title} official streaming`)}`,
+            label: `Find ${title} on ${providerName}`,
+            exactTitleDeepLink: false
+        };
+    }
+
+    const routes = [
+        [/netflix/i, `https://www.netflix.com/search?q=${query}`],
+        [/amazon prime video|prime video/i, `https://www.primevideo.com/search/ref=atv_nb_sr?phrase=${query}`],
+        [/jiohotstar|disney.?hotstar|hotstar/i, `https://www.hotstar.com/in/search?q=${query}`],
+        [/zee\s*5|zee5/i, `https://www.zee5.com/search?q=${query}`],
+        [/\baha\b/i, `https://www.aha.video/search?q=${query}`],
+        [/sony\s*liv/i, `https://www.sonyliv.com/search?q=${query}`],
+        [/apple tv/i, `https://tv.apple.com/in/search?term=${query}`],
+        [/crunchyroll/i, `https://www.crunchyroll.com/search?q=${query}`]
+    ];
+
+    const match = routes.find(([pattern]) => pattern.test(name));
+    if (match) {
+        return {
+            url: match[1],
+            label: `Search ${title} on ${providerName}`,
+            exactTitleDeepLink: false
+        };
+    }
+
+    // TMDB's regional watch-provider endpoint supplies a JustWatch title page,
+    // not provider-specific playback URLs. Use that official title-specific page
+    // for providers whose own search URL cannot be confidently identified.
+    if (typeof availabilityUrl === "string" && /^https:\/\//i.test(availabilityUrl)) {
+        return {
+            url: availabilityUrl,
+            label: `Find ${title} on ${providerName} via the availability listing`,
+            exactTitleDeepLink: false
+        };
+    }
+
+    return {
+        url: `https://www.google.com/search?q=${encodeURIComponent(`${providerName} ${title} official streaming`)}`,
+        label: `Find ${title} on ${providerName}`,
+        exactTitleDeepLink: false
+    };
+}
+
+function createProviderCards(providers = [], title = "this title", availabilityUrl = "") {
+    return providers
+        .slice(0, 12)
+        .map((provider) => {
+            const providerName = String(provider.provider_name || "Streaming provider");
+            const name = escapeHTML(providerName);
             const logo = provider.logo_path
                 ? `https://image.tmdb.org/t/p/w92${provider.logo_path}`
                 : "";
+            const destination = getProviderDestination(providerName, title, availabilityUrl);
+            const url = escapeHTML(destination.url);
+            const label = escapeHTML(destination.label);
 
             return `
-                <div class="provider-card">
-                    <div class="provider-logo">
+                <a
+                    class="provider-card provider-card-link"
+                    href="${url}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="${label}"
+                    title="${label}"
+                >
+                    <span class="provider-logo">
                         ${
                             logo
-                                ? `
-                                    <img
-                                        src="${logo}"
-                                        alt="${name}"
-                                        loading="lazy"
-                                    >
-                                `
-                                : `
-                                    <span>MV</span>
-                                `
+                                ? `<img src="${logo}" alt="" loading="lazy">`
+                                : `<span aria-hidden="true">MV</span>`
                         }
-                    </div>
-
-                    <span>${name}</span>
-                </div>
+                    </span>
+                    <span class="provider-card-copy">
+                        <strong>${name}</strong>
+                        <small>Find this title ↗</small>
+                    </span>
+                </a>
             `;
         })
         .join("");
@@ -251,10 +341,12 @@ function renderWhereToWatch(item) {
                 <span class="provider-region">
                     REGION
                     ${escapeHTML(
-                        MOVIEVERSE_CONFIG.tmdbRegion || "US"
+                        MOVIEVERSE_CONFIG.tmdbRegion || "IN"
                     )}
                 </span>
             </div>
+
+            <p class="provider-redirect-hint">Streaming availability provided by TMDB/JustWatch. Select a service to search for this title; the catalogue and playback can depend on your region and subscription.</p>
 
             <div class="provider-groups">
                 ${availableSections
@@ -269,7 +361,9 @@ function renderWhereToWatch(item) {
 
                                 <div class="provider-grid">
                                     ${createProviderCards(
-                                        section.items
+                                        section.items,
+                                        getTitle(item),
+                                        providers.link
                                     )}
                                 </div>
                             </div>
@@ -469,7 +563,7 @@ function renderDetails(
 
     const title = getTitle(item);
     const year = getYear(item);
-    const runtime = formatRuntime(item);
+    const runtime = formatRuntime(item, mediaType);
     const genres = formatGenres(item);
 
     const rating = Number.isFinite(
@@ -483,6 +577,11 @@ function renderDetails(
     )
         ? item.vote_count.toLocaleString()
         : "—";
+
+    const imdbId = item?.external_ids?.imdb_id || item?.imdb_id || "";
+    const imdbUrl = imdbId
+        ? `https://www.imdb.com/title/${encodeURIComponent(imdbId)}/`
+        : `https://www.imdb.com/find/?q=${encodeURIComponent(title)}`;
 
     const overview =
         item?.overview ||
@@ -558,6 +657,10 @@ function renderDetails(
         libraryItem.id
     );
 
+    const inContinueWatching = getContinueWatching().some(
+        (entry) => String(entry.id) === String(libraryItem.id)
+    );
+
     content.innerHTML = `
         <section
             class="details-hero"
@@ -608,9 +711,13 @@ function renderDetails(
                         ${escapeHTML(year)}
                     </span>
 
-                    <span>
-                        ★ ${rating}
+                    <span title="Rating provided by TMDB">
+                        ★ ${rating} TMDB
                     </span>
+
+                    <a class="details-imdb-link" href="${escapeHTML(imdbUrl)}" target="_blank" rel="noopener noreferrer" aria-label="Open ${escapeHTML(title)} on IMDb">
+                        IMDb page ↗
+                    </a>
 
                     <span>
                         ${
@@ -620,9 +727,14 @@ function renderDetails(
                         }
                     </span>
 
-                    <span>
+                    <span title="${mediaType === "tv" ? "Typical episode runtime" : "Full movie runtime"}">
                         ${escapeHTML(runtime)}
                     </span>
+
+                    ${mediaType === "tv" ? `
+                        <span>${Number.isFinite(item?.number_of_seasons) ? `${item.number_of_seasons} season${item.number_of_seasons === 1 ? "" : "s"}` : "Seasons TBA"}</span>
+                        <span>${Number.isFinite(item?.number_of_episodes) ? `${item.number_of_episodes} episode${item.number_of_episodes === 1 ? "" : "s"}` : "Episodes TBA"}</span>
+                    ` : ""}
                 </div>
 
                 ${
@@ -678,6 +790,15 @@ function renderDetails(
                                 ? "♥ In Wishlist"
                                 : "♡ Wishlist"
                         }
+                    </button>
+
+                    <button
+                        type="button"
+                        class="button button-quiet"
+                        data-details-continue
+                        data-active="${inContinueWatching ? "true" : "false"}"
+                    >
+                        ${inContinueWatching ? "✓ In Continue Watching" : "+ Continue Watching"}
                     </button>
 
                     <button
@@ -742,12 +863,13 @@ function renderDetails(
             <div class="details-info-grid">
                 <div>
                     <span class="details-label">
-                        Rating
+                        TMDB rating
                     </span>
 
                     <strong>
-                        ★ ${rating}
+                        ★ ${rating} / 10
                     </strong>
+                    <a class="details-imdb-link" href="${escapeHTML(imdbUrl)}" target="_blank" rel="noopener noreferrer">Check IMDb ↗</a>
                 </div>
 
                 <div>
@@ -772,13 +894,25 @@ function renderDetails(
 
                 <div>
                     <span class="details-label">
-                        Runtime
+                        ${mediaType === "tv" ? "Episode runtime" : "Movie runtime"}
                     </span>
 
                     <strong>
                         ${escapeHTML(runtime)}
                     </strong>
                 </div>
+
+                ${mediaType === "tv" ? `
+                    <div>
+                        <span class="details-label">Seasons</span>
+                        <strong>${Number.isFinite(item?.number_of_seasons) ? item.number_of_seasons : "TBA"}</strong>
+                    </div>
+
+                    <div>
+                        <span class="details-label">Episodes</span>
+                        <strong>${Number.isFinite(item?.number_of_episodes) ? item.number_of_episodes.toLocaleString() : "TBA"}</strong>
+                    </div>
+                ` : ""}
             </div>
         </section>
 
@@ -804,7 +938,7 @@ function renderDetails(
                             ${
                                 director
                                     ? `
-                                        <div class="details-person">
+                                        <div class="details-person" tabindex="0" role="link" data-person-id="${escapeHTML(director.id || "")}" data-person-name="${escapeHTML(director.name || "")}" data-person-character="Director" title="Hover for details · click to search Google">
                                             <strong>
                                                 Director
                                             </strong>
@@ -822,7 +956,7 @@ function renderDetails(
                             ${
                                 creator
                                     ? `
-                                        <div class="details-person">
+                                        <div class="details-person" tabindex="0" role="link" data-person-id="${escapeHTML(creator.id || "")}" data-person-name="${escapeHTML(creator.name || "")}" data-person-character="Creator" title="Hover for details · click to search Google">
                                             <strong>
                                                 Creator
                                             </strong>
@@ -870,6 +1004,13 @@ function renderDetails(
                                     return `
                                         <article
                                             class="details-cast-card"
+                                            tabindex="0"
+                                            role="link"
+                                            data-person-id="${escapeHTML(person.id || "")}"
+                                            data-person-name="${escapeHTML(person.name || "")}"
+                                            data-person-character="${escapeHTML(person.character || "")}"
+                                            title="Hover for cast details · click to search Google"
+                                            aria-label="More about ${escapeHTML(person.name || "cast member")}"
                                         >
                                             <div
                                                 class="details-cast-image"
@@ -1012,6 +1153,11 @@ function bindDetailsActions(
             "[data-details-watched]"
         );
 
+    const continueButton =
+        detailsModal.querySelector(
+            "[data-details-continue]"
+        );
+
     listButton?.addEventListener(
         "click",
         () => {
@@ -1056,6 +1202,22 @@ function bindDetailsActions(
 
                 wishlistButton.dataset.active =
                     "false";
+            }
+        }
+    );
+
+    continueButton?.addEventListener(
+        "click",
+        () => {
+            const active = continueButton.dataset.active === "true";
+            if (active) {
+                removeContinueWatching(libraryItem.id);
+                continueButton.textContent = "+ Continue Watching";
+                continueButton.dataset.active = "false";
+            } else {
+                setContinueWatching(libraryItem, 0);
+                continueButton.textContent = "✓ In Continue Watching";
+                continueButton.dataset.active = "true";
             }
         }
     );
@@ -1130,7 +1292,8 @@ async function loadDetails(
         item,
         credits,
         videos,
-        similar
+        similar,
+        watchProviders
     ] = await Promise.all([
         isTv
             ? getTvDetails(id)
@@ -1149,11 +1312,28 @@ async function loadDetails(
         getSimilar(
             id,
             mediaType
-        )
+        ),
+
+        (isTv
+            ? getTvWatchProviders(id)
+            : getMovieWatchProviders(id)
+        ).catch((error) => {
+            console.warn("MovieVerse regional watch-provider lookup failed:", error);
+            return null;
+        })
     ]);
 
+    const itemWithProviders =
+        watchProviders?.results &&
+        Object.keys(watchProviders.results).length
+            ? {
+                  ...item,
+                  "watch/providers": watchProviders
+              }
+            : item;
+
     renderDetails(
-        item,
+        itemWithProviders,
         credits,
         videos,
         similar,
@@ -1213,6 +1393,10 @@ export function setupDetails() {
     document.addEventListener(
         "click",
         (event) => {
+            if (event.target.closest("[data-imdb-search]")) {
+                return;
+            }
+
             const card =
                 event.target.closest(
                     ".movie-card[data-tmdb-id]"
