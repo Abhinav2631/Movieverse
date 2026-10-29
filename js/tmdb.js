@@ -172,7 +172,8 @@ export async function getPersonDetails(personId) {
 
 // HOME
 export async function getTrending() {
-    return tmdbFetch("/trending/all/week", {
+    // Daily trends keep the homepage hero closer to current entertainment activity.
+    return tmdbFetch("/trending/all/day", {
         region: MOVIEVERSE_CONFIG.tmdbRegion
     });
 }
