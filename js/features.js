@@ -15,6 +15,8 @@ import {
 
 import { openDetails } from "./details.js";
 
+import { MOVIEVERSE_CONFIG } from "../config/config.js";
+
 const LANGUAGE_CODES = {
     English: "en",
     Hindi: "hi",
@@ -74,7 +76,7 @@ const DOMAINS = [
         key: "movies",
         title: "Movies",
         description: "Big-screen stories",
-        type: "discover",
+        type: "movie",
         params: {}
     },
     {
@@ -746,7 +748,7 @@ async function renderOTT() {
                                         .providerId,
 
                                 watch_region:
-                                    "IN",
+                                    (MOVIEVERSE_CONFIG.tmdbRegion || "IN"),
 
                                 with_watch_monetization_types:
                                     "flatrate|free|ads"
@@ -1117,6 +1119,11 @@ async function loadDomain(key) {
 
     if (domain.type === "tv") {
         await loadDiscover({}, domain.title, "tv");
+        return;
+    }
+
+    if (domain.type === "movie") {
+        await loadDiscover({}, domain.title, "movie");
         return;
     }
 
