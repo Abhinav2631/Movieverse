@@ -160,7 +160,8 @@ export async function getWatchProviderCatalog(
     return tmdbFetch(
         mediaType === "tv"
             ? "/watch/providers/tv"
-            : "/watch/providers/movie"
+            : "/watch/providers/movie",
+        { watch_region: "IN" }
     );
 }
 
