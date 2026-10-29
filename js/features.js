@@ -1975,66 +1975,37 @@ function setupExternalTriggers() {
             element.addEventListener(
                 "click",
                 () => {
-                    const raw =
-                        element.textContent
-                            .trim()
-                            .toLowerCase();
+                    const raw = element.textContent.trim().toLowerCase();
+                    const genreIds = {
+                        "sci-fi": 878,
+                        thriller: 53,
+                        comedy: 35,
+                        animation: 16,
+                        fantasy: 14,
+                        drama: 18,
+                        crime: 80,
+                        romance: 10749
+                    };
+                    const genreNames = {
+                        "sci-fi": "Science Fiction",
+                        thriller: "Thriller",
+                        comedy: "Comedy",
+                        animation: "Animation",
+                        fantasy: "Fantasy",
+                        drama: "Drama",
+                        crime: "Crime",
+                        romance: "Romance"
+                    };
+                    const genreId = genreIds[raw];
+                    if (!genreId) return;
 
-                    const mapped =
-                        raw === "sci-fi"
-                            ? "science fiction"
-                            : raw;
-
-                    openFeatures(
-                        "genres"
-                    );
-
-                    window.setTimeout(
-                        async () => {
-                            try {
-                                const [
-                                    movies,
-                                    tv
-                                ] =
-                                    await Promise.all(
-                                        [
-                                            getMovieGenres(),
-                                            getTvGenres()
-                                        ]
-                                    );
-
-                                const all = [
-                                    ...(movies.genres ||
-                                        []),
-                                    ...(tv.genres ||
-                                        [])
-                                ];
-
-                                const genre =
-                                    all.find(
-                                        (
-                                            item
-                                        ) =>
-                                            item.name
-                                                .toLowerCase() ===
-                                            mapped
-                                    );
-
-                                if (genre) {
-                                    loadDiscover(
-                                        {
-                                            with_genres:
-                                                genre.id
-                                        },
-                                        genre.name
-                                    );
-                                }
-                            } catch {
-                                renderFeatureError();
-                            }
-                        },
-                        50
-                    );
+                    openFeatures("genres");
+                    window.setTimeout(() => {
+                        loadDiscover(
+                            { with_genres: String(genreId) },
+                            genreNames[raw]
+                        );
+                    }, 50);
                 }
             );
         });
