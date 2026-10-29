@@ -128,7 +128,7 @@
     max-width: 340px;
     overflow: auto;
     padding: 17px;
-    pointer-events: none;
+    pointer-events: auto;
     position: fixed;
     top: 0;
     transform: translateZ(0);
