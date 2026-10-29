@@ -162,7 +162,7 @@ function getProviderDestination(providerName, title, availabilityUrl = "") {
         [/zee\s*5|zee5/i, `https://www.zee5.com/search?q=${query}`],
         [/\baha\b/i, `https://www.aha.video/search?q=${query}`],
         [/sony\s*liv/i, `https://www.sonyliv.com/search?q=${query}`],
-        [/apple tv/i, `https://tv.apple.com/search?term=${query}`],
+        [/apple tv/i, `https://tv.apple.com/in/search?term=${query}`],
         [/crunchyroll/i, `https://www.crunchyroll.com/search?q=${query}`]
     ];
 
