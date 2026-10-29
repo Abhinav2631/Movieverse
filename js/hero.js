@@ -57,7 +57,8 @@ function ensureCarouselControls() {
             <button type="button" class="hero-carousel-arrow" data-hero-next aria-label="Show next trending title" title="Next title">→</button>
         </div>
     `;
-    heroElement.appendChild(controlsElement);
+    const heroContent = heroElement.querySelector(".hero-content") || heroElement;
+    heroContent.appendChild(controlsElement);
 
     controlsElement.querySelector("[data-hero-prev]")?.addEventListener("click", () => {
         showSlide(activeIndex - 1, true);
@@ -66,11 +67,11 @@ function ensureCarouselControls() {
         showSlide(activeIndex + 1, true);
     });
 
-    heroElement.addEventListener("mouseenter", pauseRotation);
-    heroElement.addEventListener("mouseleave", resumeRotation);
-    heroElement.addEventListener("focusin", pauseRotation);
-    heroElement.addEventListener("focusout", (event) => {
-        if (!heroElement.contains(event.relatedTarget)) resumeRotation();
+    controlsElement.addEventListener("mouseenter", pauseRotation);
+    controlsElement.addEventListener("mouseleave", resumeRotation);
+    controlsElement.addEventListener("focusin", pauseRotation);
+    controlsElement.addEventListener("focusout", (event) => {
+        if (!controlsElement.contains(event.relatedTarget)) resumeRotation();
     });
 
     return controlsElement;
