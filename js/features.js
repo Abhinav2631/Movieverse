@@ -2001,15 +2001,17 @@ function setupExternalTriggers() {
                 "click",
                 () => {
                     const raw = element.textContent.trim().toLowerCase();
+                    // Movie and TV genre catalogs use different IDs for some broad genres.
+                    // Pipe-separated IDs let each discovery endpoint match its own valid genre.
                     const genreIds = {
-                        "sci-fi": 878,
-                        thriller: 53,
-                        comedy: 35,
-                        animation: 16,
-                        fantasy: 14,
-                        drama: 18,
-                        crime: 80,
-                        romance: 10749
+                        "sci-fi": "878|10765",
+                        thriller: "53|9648",
+                        comedy: "35",
+                        animation: "16",
+                        fantasy: "14|10765",
+                        drama: "18",
+                        crime: "80",
+                        romance: "10749|18"
                     };
                     const genreNames = {
                         "sci-fi": "Science Fiction",
@@ -2027,7 +2029,7 @@ function setupExternalTriggers() {
                     openFeatures("genres");
                     window.setTimeout(() => {
                         loadDiscover(
-                            { with_genres: String(genreId) },
+                            { with_genres: genreId },
                             genreNames[raw]
                         );
                     }, 50);
