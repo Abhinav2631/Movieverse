@@ -39,6 +39,10 @@ const railLoaders = {
         null
 };
 
+let lastRailsRefreshAt = 0;
+let railRefreshInterval = null;
+let railVisibilityRefreshBound = false;
+
 const escapeHTML = (
     value = ""
 ) =>
@@ -323,6 +327,8 @@ function renderFallbackRail(
 }
 
 export async function renderRails() {
+    lastRailsRefreshAt = Date.now();
+
     const rails =
         document.querySelectorAll(
             "[data-rail]"
@@ -463,6 +469,36 @@ export function setupHomeInteractions() {
 
     header.dataset.ready =
         "true";
+
+    // Refresh live TMDB home rails on a 30-minute cadence while the app is visible.
+    // If the tab was hidden for a while, refresh when the user returns to it.
+    if (!railRefreshInterval) {
+        railRefreshInterval = window.setInterval(() => {
+            const appShell = document.getElementById("app-shell");
+            if (
+                appShell &&
+                !appShell.hidden &&
+                document.visibilityState === "visible"
+            ) {
+                renderRails();
+            }
+        }, 30 * 60 * 1000);
+    }
+
+    if (!railVisibilityRefreshBound) {
+        document.addEventListener("visibilitychange", () => {
+            const appShell = document.getElementById("app-shell");
+            if (
+                document.visibilityState === "visible" &&
+                appShell &&
+                !appShell.hidden &&
+                Date.now() - lastRailsRefreshAt >= 30 * 60 * 1000
+            ) {
+                renderRails();
+            }
+        });
+        railVisibilityRefreshBound = true;
+    }
 
     window.addEventListener(
         "scroll",
