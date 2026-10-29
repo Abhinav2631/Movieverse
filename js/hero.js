@@ -226,10 +226,11 @@ function showSlide(index, resetAutoplay = true) {
 
 async function loadHero() {
     try {
-        // Two TMDB pages provide up to 40 candidates; use 20 unique movie/TV titles.
+        // Three TMDB pages provide a larger pool so the carousel can normally fill all 20 slots after filtering out people and titles without artwork.
         const responses = await Promise.all([
             getTrending(1),
-            getTrending(2)
+            getTrending(2),
+            getTrending(3)
         ]);
 
         const unique = new Map();
