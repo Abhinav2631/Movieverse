@@ -216,7 +216,7 @@ export async function getMovieDetails(id) {
 
 export async function getTvDetails(id) {
     return tmdbFetch(`/tv/${id}`, {
-        append_to_response: "watch/providers,images"
+        append_to_response: "watch/providers,images,external_ids"
     });
 }
 
