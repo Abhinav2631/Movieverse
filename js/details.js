@@ -4,7 +4,9 @@ import {
     getCredits,
     getVideos,
     getSimilar,
-    getPosterUrl
+    getPosterUrl,
+    getMovieWatchProviders,
+    getTvWatchProviders
 } from "./tmdb.js";
 
 import { MOVIEVERSE_CONFIG } from "../config/config.js";
@@ -1267,7 +1269,8 @@ async function loadDetails(
         item,
         credits,
         videos,
-        similar
+        similar,
+        watchProviders
     ] = await Promise.all([
         isTv
             ? getTvDetails(id)
@@ -1286,11 +1289,28 @@ async function loadDetails(
         getSimilar(
             id,
             mediaType
-        )
+        ),
+
+        (isTv
+            ? getTvWatchProviders(id)
+            : getMovieWatchProviders(id)
+        ).catch((error) => {
+            console.warn("MovieVerse regional watch-provider lookup failed:", error);
+            return null;
+        })
     ]);
 
+    const itemWithProviders =
+        watchProviders?.results &&
+        Object.keys(watchProviders.results).length
+            ? {
+                  ...item,
+                  "watch/providers": watchProviders
+              }
+            : item;
+
     renderDetails(
-        item,
+        itemWithProviders,
         credits,
         videos,
         similar,
