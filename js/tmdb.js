@@ -120,23 +120,21 @@ export async function discoverBoth(params = {}) {
         discoverMedia("tv", params)
     ]);
 
+    // Movie and TV catalogs have separate ID namespaces; preserve the media type
+    // before deduplicating so an ID collision does not discard a valid result.
     const combined = [
-        ...(movies?.results || []),
-        ...(tv?.results || [])
+        ...(movies?.results || []).map((item) => ({ ...item, media_type: "movie" })),
+        ...(tv?.results || []).map((item) => ({ ...item, media_type: "tv" }))
     ];
 
     const unique = new Map();
 
     combined.forEach((item) => {
-        const key = item?.id ?? `${item?.title || item?.name || "unknown"}-${item?.media_type || "item"}`;
+        const identity = item?.id ?? `${item?.title || item?.name || "unknown"}`;
+        const key = `${item?.media_type || "movie"}:${identity}`;
 
         if (!unique.has(key)) {
-            unique.set(key, {
-                ...item,
-                media_type:
-                    item?.media_type ||
-                    (item?.first_air_date ? "tv" : "movie")
-            });
+            unique.set(key, item);
         }
     });
 
