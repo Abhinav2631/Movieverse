@@ -210,7 +210,7 @@ export async function getUpcomingMovies() {
 // DETAILS
 export async function getMovieDetails(id) {
     return tmdbFetch(`/movie/${id}`, {
-        append_to_response: "watch/providers,images"
+        append_to_response: "watch/providers,images,external_ids"
     });
 }
 
