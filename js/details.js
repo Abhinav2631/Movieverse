@@ -61,7 +61,7 @@ function formatDuration(minutes, suffix = "") {
         : `${remainder} min`;
 
     return suffix
-        ? `${readable} ${suffix} (${value} min)`
+        ? `${readable} ${suffix}`
         : `${readable} (${value} min)`;
 }
 
