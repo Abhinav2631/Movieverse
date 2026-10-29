@@ -644,13 +644,30 @@ async function renderOTT() {
             );
         });
 
+        const preferredProviders = [
+            /netflix/i,
+            /amazon prime video|prime video/i,
+            /jiohotstar|disney.?hotstar|hotstar/i,
+            /^zee5$/i,
+            /^aha$/i,
+            /sony liv/i,
+            /apple tv/i,
+            /crunchyroll/i,
+            /sun nxt/i,
+            /lionsgate play/i,
+            /hoichoi/i,
+            /manoramamax/i
+        ];
+        const providerPriority = (name = "") => {
+            const index = preferredProviders.findIndex((pattern) => pattern.test(name));
+            return index < 0 ? preferredProviders.length : index;
+        };
         const sorted = [
             ...providers.values()
-        ].sort((a, b) =>
-            a.provider_name.localeCompare(
-                b.provider_name
-            )
-        );
+        ].sort((a, b) => {
+            const priorityDifference = providerPriority(a.provider_name) - providerPriority(b.provider_name);
+            return priorityDifference || a.provider_name.localeCompare(b.provider_name);
+        });
 
         content.innerHTML = `
             <div class="mv-feature-intro">
