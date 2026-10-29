@@ -390,10 +390,12 @@ export async function renderRails() {
                         )
                             ? data.results
                                   .filter(
-                                      (
-                                          item
-                                      ) =>
-                                          item.id
+                                      (item) =>
+                                          item.id &&
+                                          (
+                                              section !== "trending" ||
+                                              ["movie", "tv"].includes(item.media_type)
+                                          )
                                   )
                             : [];
 
